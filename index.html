@@ -32,7 +32,7 @@
         .card { background: var(--bg-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
         .sticky-section { display: flex; flex-direction: column; gap: 16px; }
         
-        /* 藍色展示卡片：不鎖死高度，允許長句自然撐開換行 */
+        /* 藍色展示卡片 */
         .display-card { 
             background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); 
             color: white; 
@@ -48,7 +48,6 @@
             gap: 12px;
         }
         
-        /* 印地語天成文字型大小調適（1.35rem），允許完整換行不截斷 */
         .hindi-text { 
             font-size: 1.35rem; 
             font-weight: 700; 
@@ -59,7 +58,6 @@
             overflow: visible;
         }
         
-        /* 羅馬拼音字型調整 */
         .roman-text { 
             font-size: 1rem; 
             opacity: 0.9; 
@@ -71,7 +69,6 @@
             overflow: visible;
         }
         
-        /* 中文翻譯字型調整 */
         .zh-text { 
             font-size: 0.95rem; 
             line-height: 1.5;
@@ -92,9 +89,24 @@
         .list-card { display: flex; flex-direction: column; flex-grow: 1; }
         .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
         .sentence-list { display: flex; flex-direction: column; gap: 8px; }
-        .sentence-item { display: flex; align-items: center; padding: 14px 16px; border-radius: 12px; background-color: #ffffff; border: 1px solid var(--border-color); cursor: pointer; }
+        .sentence-item { display: flex; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background-color: #ffffff; border: 1px solid var(--border-color); cursor: pointer; }
         .sentence-item.active { background-color: var(--accent-blue); border-color: var(--primary); }
-        .checkbox-custom { width: 22px; height: 22px; margin-right: 14px; accent-color: var(--primary); }
+        .checkbox-custom { width: 22px; height: 22px; margin-right: 12px; margin-top: 2px; accent-color: var(--primary); flex-shrink: 0; }
+        
+        /* 句子 ID 編號標籤樣式 */
+        .id-badge {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #3730a3;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-right: 8px;
+            vertical-align: middle;
+            font-family: monospace, monospace;
+        }
+        
         .sentence-content { flex-grow: 1; }
         .sentence-hindi { font-size: 1.15rem; font-weight: 700; color: #1e293b; line-height: 1.4; }
         .sentence-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
@@ -164,9 +176,13 @@
                     }
                     updateSelectCount();
                 };
+                
+                // 取得 A 欄的 ID 欄位 (支援 id, ID, Id 等大小寫)
+                const sentenceId = s.id || s.ID || s.Id || (idx + 1);
+                
                 item.innerHTML = `<input type="checkbox" class="checkbox-custom select-box" value="${idx}" onchange="updateSelectCount()">
                     <div class="sentence-content">
-                        <div class="sentence-hindi">${s.hindi}</div>
+                        <div class="sentence-hindi"><span class="id-badge">#${sentenceId}</span>${s.hindi}</div>
                         <div class="sentence-sub">${s.roman ? s.roman + ' • ' : ''}${s.zh || ''}</div>
                     </div>`;
                 listDiv.appendChild(item);
