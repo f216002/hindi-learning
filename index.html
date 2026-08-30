@@ -66,19 +66,23 @@
             <div id="sentenceList" class="sentence-list"><div class="status-msg">⏳ 正在載入語音資料庫...</div></div>
         </div>
     </div>
-    <audio id="audioPlayer"></audio>
+    <audio id="audioPlayer" crossorigin="anonymous"></audio>
     <script>
-        // ⚠️ 請填入你的 Google 試算表 CSV 網址 ⚠️
+        // ⚠️ 請確認此處貼上的是你「發布到網路」的 CSV 連結 ⚠️
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS9BA88Sf3mnAfyLALjFSNAWJEjBCd0A8EiA6JRLuwSMe2JHhT-8vD3nm-7sZKYZ3HOlFLAOfS2Aqd3/pub?gid=0&single=true&output=csv";
 
         let sentences = [], playQueue = [], currentIndex = 0;
         const audio = document.getElementById('audioPlayer');
 
+        // 修正處：使用更強大的 Drive 音檔轉換邏輯，包含原生媒體串流 CDN 網址
         function formatDriveUrl(url) {
             if (!url) return "";
             url = url.trim();
             let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-            return (match && match[1]) ? `https://drive.google.com/uc?export=download&id=${match[1]}` : url;
+            if (match && match[1]) {
+                return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            }
+            return url;
         }
 
         function loadSheetsData() {
@@ -139,8 +143,21 @@
                 activeItem.classList.add('active');
                 activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
-            audio.src = formatDriveUrl(s.audio);
-            audio.play().catch(e => alert('播放失敗，請檢查 Google Drive 權限'));
+
+            const streamUrl = formatDriveUrl(s.audio);
+            audio.src = streamUrl;
+            
+            audio.play().catch(e => {
+                // 若 lh3 服務阻擋，嘗試備用 direct download 網址
+                console.warn("串流失敗，嘗試備用連結:", e);
+                const altMatch = s.audio.match(/\/d\/([a-zA-Z0-9_-]+)/) || s.audio.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                if (altMatch && altMatch[1]) {
+                    audio.src = `https://drive.google.com/uc?export=download&id=${altMatch[1]}`;
+                    audio.play().catch(err => {
+                        alert(`播放失敗！請確認 Google Drive 中的 MP3 檔案已設為「知道連結的人皆可檢視」。`);
+                    });
+                }
+            });
         }
 
         audio.onended = function() {
