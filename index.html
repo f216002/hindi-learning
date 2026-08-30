@@ -1,166 +1,207 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>印地語學習隨身聽</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        :root { --primary: #2563eb; --bg-body: #f8fafc; --bg-card: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --accent-blue: #eff6ff; --border-color: #e2e8f0; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 12px; background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-        header { text-align: center; padding: 10px 0 15px 0; }
-        header h1 { margin: 0; font-size: 1.5rem; color: #1e3a8a; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .app-container { width: 100%; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; flex-grow: 1; }
-        .card { background: var(--bg-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
-        .sticky-section { display: flex; flex-direction: column; gap: 16px; }
-        .display-card { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; text-align: center; min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 16px; border: none; }
-        .hindi-text { font-size: 2.8rem; font-weight: 700; margin: 0; line-height: 1.25; }
-        .roman-text { font-size: 1.25rem; opacity: 0.9; font-style: italic; margin-top: 10px; }
-        .zh-text { font-size: 1.2rem; margin-top: 8px; font-weight: 500; background: rgba(255, 255, 255, 0.15); padding: 4px 16px; border-radius: 20px; }
-        .controls-card { display: flex; flex-direction: column; gap: 12px; align-items: center; }
-        .btn-group { display: flex; gap: 12px; width: 100%; }
-        button { flex: 1; padding: 14px 20px; font-size: 1.05rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:disabled { background-color: #cbd5e1; }
-        .btn-secondary { background-color: #f1f5f9; color: #475569; }
-        .loop-option { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text-muted); cursor: pointer; }
-        .list-card { display: flex; flex-direction: column; flex-grow: 1; }
-        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
-        .sentence-list { display: flex; flex-direction: column; gap: 8px; }
-        .sentence-item { display: flex; align-items: center; padding: 14px 16px; border-radius: 12px; background-color: #ffffff; border: 1px solid var(--border-color); cursor: pointer; }
-        .sentence-item.active { background-color: var(--accent-blue); border-color: var(--primary); }
-        .checkbox-custom { width: 22px; height: 22px; margin-right: 14px; accent-color: var(--primary); }
-        .sentence-content { flex-grow: 1; }
-        .sentence-hindi { font-size: 1.25rem; font-weight: 700; color: #1e293b; }
-        .sentence-sub { font-size: 0.9rem; color: var(--text-muted); }
-        .status-msg { text-align: center; padding: 40px 20px; color: var(--text-muted); }
-        @media (min-width: 768px) {
-            body { padding: 24px; }
-            header { text-align: left; }
-            .app-container { display: grid; grid-template-columns: 380px 1fr; align-items: start; }
-            .sticky-section { position: sticky; top: 24px; }
-            .hindi-text { font-size: 3.2rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>印地語學習隨身聽</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f5f7fb;
+      color: #333;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #1a365d;
+      margin-bottom: 20px;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      align-items: flex-start;
+    }
+    /* 左側卡片區域 */
+    .left-panel {
+      width: 320px;
+      flex-shrink: 0;
+    }
+    .display-card {
+      background-color: #1d4ed8;
+      color: white;
+      border-radius: 12px;
+      padding: 24px 20px;
+      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2);
+      text-align: center;
+    }
+    /* 調整重點：天成文印地語字型縮小 */
+    .card-hindi {
+      font-size: 1.25rem; /* 已調整為適中大小 */
+      line-height: 1.6;
+      font-weight: 600;
+      margin-bottom: 20px;
+      word-break: break-word;
+    }
+    .card-roman {
+      font-size: 0.95rem;
+      font-style: italic;
+      opacity: 0.9;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      word-break: break-word;
+    }
+    .card-zh {
+      font-size: 0.95rem;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 10px 12px;
+      border-radius: 8px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .controls {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn-play {
+      background-color: #2563eb;
+      color: white;
+    }
+    .btn-pause {
+      background-color: #e5e7eb;
+      color: #374151;
+    }
+    .loop-opt {
+      font-size: 0.85rem;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    /* 右側清單區域 */
+    .right-panel {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .sentence-item {
+      border: 2px solid #2563eb;
+      background-color: #eff6ff;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    .sentence-content {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .item-hindi {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .item-sub {
+      color: #4b5563;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .left-panel {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header><div style="max-width: 1100px; margin: 0 auto; width: 100%;"><h1>🇮🇳 印地語學習隨身聽</h1></div></header>
-    <div class="app-container">
-        <div class="sticky-section">
-            <div class="card display-card">
-                <div id="displayHindi" class="hindi-text">請選擇句子</div>
-                <div id="displayRoman" class="roman-text">Select sentences to start</div>
-                <div id="displayZh" class="zh-text">開始聽覺練習</div>
-            </div>
-            <div class="card controls-card">
-                <div class="btn-group">
-                    <button id="playBtn" class="btn-primary" onclick="playSelected()">▶ 播放</button>
-                    <button id="pauseBtn" class="btn-secondary" onclick="pauseAudio()" disabled>⏸ 暫停</button>
-                </div>
-                <label class="loop-option"><input type="checkbox" id="loopCheck"> 🔁 循環播放勾選清單 (Loop)</label>
-            </div>
+
+  <div class="header">IN 印地語學習隨身聽</div>
+
+  <div class="container">
+    <!-- 左側卡片與控制器 -->
+    <div class="left-panel">
+      <div class="display-card">
+        <div class="card-hindi" id="cardHindi">चाहे दूसरे आपकी कितनी भी मदद करें...</div>
+        <div class="card-roman" id="cardRoman">Chahe doosre aapki kitni bhi madad karein...</div>
+        <div class="card-zh" id="cardZh">無論別人怎麼幫你，他們終究是別人；只有你能幫助自己，才是最真實的</div>
+      </div>
+
+      <div class="controls">
+        <div class="btn-group">
+          <button class="btn btn-play" onclick="playAudio()">▶ 播放</button>
+          <button class="btn btn-pause" onclick="pauseAudio()">❚❚ 暫停</button>
         </div>
-        <div class="card list-card">
-            <div class="list-header"><h3>常用日常句子</h3><span id="selectCount" style="font-size: 0.85rem; color: var(--text-muted);">已選擇 0 句</span></div>
-            <div id="sentenceList" class="sentence-list"><div class="status-msg">⏳ 正在載入語音資料庫...</div></div>
+        <div class="loop-opt">
+          <label><input type="checkbox" id="loopCheck"> 循環播放勾選清單 (Loop)</label>
         </div>
+      </div>
     </div>
-    <audio id="audioPlayer"></audio>
-    <script>
-        // ⚠️ 請確認此處貼上的是你「發布到網路」的 CSV 連結 ⚠️
-        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS9BA88Sf3mnAfyLALjFSNAWJEjBCd0A8EiA6JRLuwSMe2JHhT-8vD3nm-7sZKYZ3HOlFLAOfS2Aqd3/pub?gid=0&single=true&output=csv";
 
-        let sentences = [], playQueue = [], currentIndex = 0;
-        const audio = document.getElementById('audioPlayer');
+    <!-- 右側句子選單 -->
+    <div class="right-panel">
+      <div class="list-header">
+        <span>常用日常句子</span>
+        <span style="color: #6b7280; font-size: 0.85rem;">已選擇 1 句</span>
+      </div>
 
-        function loadSheetsData() {
-            if (!CSV_URL || CSV_URL.includes("YOUR_GOOGLE_SHEETS")) return;
-            Papa.parse(CSV_URL, {
-                download: true, header: true, skipEmptyLines: true,
-                complete: function(r) {
-                    sentences = r.data.filter(row => row.hindi && row.hindi.trim() !== '' && row.audio);
-                    renderList();
-                }
-            });
-        }
+      <div class="sentence-item">
+        <input type="checkbox" checked style="margin-top: 3px;">
+        <div class="sentence-content">
+          <div class="item-hindi">चाहे दूसरे आपकी कितनी भी मदद करें, वे आखिरकार दूसरे ही हैं। सिर्फ आप ही अपनी मदद कर सकते हैं, यही सबसे बड़ा सच है।</div>
+          <div class="item-sub">Chahe doosre aapki kitni bhi madad karein, ve aakhirkaar doosre hi hain... • 無論別人怎麼幫你，他們終究是別人...</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        function renderList() {
-            const listDiv = document.getElementById('sentenceList');
-            listDiv.innerHTML = '';
-            sentences.forEach((s, idx) => {
-                const item = document.createElement('div');
-                item.className = 'sentence-item';
-                item.id = `item-${idx}`;
-                item.onclick = function(e) {
-                    if (e.target.tagName !== 'INPUT') {
-                        const cb = item.querySelector('.checkbox-custom');
-                        cb.checked = !cb.checked;
-                    }
-                    updateSelectCount();
-                };
-                item.innerHTML = `<input type="checkbox" class="checkbox-custom select-box" value="${idx}" onchange="updateSelectCount()">
-                    <div class="sentence-content">
-                        <div class="sentence-hindi">${s.hindi}</div>
-                        <div class="sentence-sub">${s.roman ? s.roman + ' • ' : ''}${s.zh || ''}</div>
-                    </div>`;
-                listDiv.appendChild(item);
-            });
-        }
+  <audio id="audioPlayer"></audio>
 
-        function updateSelectCount() {
-            document.getElementById('selectCount').innerText = `已選擇 ${document.querySelectorAll('.select-box:checked').length} 句`;
-        }
-
-        function playSelected() {
-            playQueue = Array.from(document.querySelectorAll('.select-box:checked')).map(cb => parseInt(cb.value));
-            if (playQueue.length === 0) return alert('請先勾選句子！');
-            currentIndex = 0;
-            loadAndPlay(playQueue[currentIndex]);
-            document.getElementById('playBtn').disabled = true;
-            document.getElementById('pauseBtn').disabled = false;
-        }
-
-        function loadAndPlay(index) {
-            const s = sentences[index];
-            document.getElementById('displayHindi').innerText = s.hindi;
-            document.getElementById('displayRoman').innerText = s.roman || '';
-            document.getElementById('displayZh').innerText = s.zh || '';
-            document.querySelectorAll('.sentence-item').forEach(el => el.classList.remove('active'));
-            const activeItem = document.getElementById(`item-${index}`);
-            if (activeItem) {
-                activeItem.classList.add('active');
-                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-
-            // 直接讀取 GitHub 上存放的相對路徑音檔
-            audio.src = s.audio.trim();
-            audio.play().catch(e => {
-                console.error("播放失敗:", e);
-                alert('音檔載入失敗！請檢查試算表中的路徑是否正確（例如 audio/1.mp3），並確認該檔案已上傳至 GitHub。');
-            });
-        }
-
-        audio.onended = function() {
-            currentIndex++;
-            if (currentIndex < playQueue.length) {
-                loadAndPlay(playQueue[currentIndex]);
-            } else if (document.getElementById('loopCheck').checked) {
-                currentIndex = 0;
-                loadAndPlay(playQueue[currentIndex]);
-            } else {
-                document.getElementById('playBtn').disabled = false;
-                document.getElementById('pauseBtn').disabled = true;
-            }
-        };
-
-        function pauseAudio() {
-            audio.pause();
-            document.getElementById('playBtn').disabled = false;
-            document.getElementById('pauseBtn').disabled = true;
-        }
-
-        loadSheetsData();
-    </script>
+  <script>
+    // 播放音檔控制邏輯
+    function playAudio() {
+      const player = document.getElementById('audioPlayer');
+      player.src = 'audio/0001.mp3'; // 請確保路徑與檔名正確
+      player.play().catch(e => alert('播放失敗：' + e));
+    }
+    function pauseAudio() {
+      const player = document.getElementById('audioPlayer');
+      player.pause();
+    }
+  </script>
 </body>
 </html>
