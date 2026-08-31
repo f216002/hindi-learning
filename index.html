@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>印地語學習隨身聽</title>
+    <title>印地語主題學習隨身聽</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
             --primary: #2563eb; 
+            --primary-dark: #1e40af; 
             --bg-body: #f8fafc; 
             --bg-card: #ffffff; 
             --text-main: #0f172a; 
@@ -26,26 +27,26 @@
             display: flex; 
             flex-direction: column; 
         }
-        header { text-align: center; padding: 10px 0 15px 0; }
-        header h1 { margin: 0; font-size: 1.5rem; color: #1e3a8a; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .app-container { width: 100%; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; flex-grow: 1; }
-        .card { background: var(--bg-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
-        .sticky-section { display: flex; flex-direction: column; gap: 16px; }
+        header { text-align: center; padding: 8px 0 12px 0; }
+        header h1 { margin: 0; font-size: 1.45rem; color: #1e3a8a; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .app-container { width: 100%; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; flex-grow: 1; }
+        .card { background: var(--bg-card); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+        .sticky-section { display: flex; flex-direction: column; gap: 14px; }
         
         /* 藍色展示卡片 */
         .display-card { 
             background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); 
             color: white; 
             text-align: center; 
-            min-height: 200px; 
+            min-height: 180px; 
             height: auto;
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
-            padding: 24px 20px; 
+            padding: 20px 16px; 
             border: none; 
-            gap: 12px;
+            gap: 10px;
         }
         
         .hindi-text { 
@@ -55,23 +56,21 @@
             line-height: 1.5; 
             white-space: normal;
             word-break: break-word;
-            overflow: visible;
         }
         
         .roman-text { 
             font-size: 1rem; 
             opacity: 0.9; 
             font-style: italic; 
-            line-height: 1.4;
+            line-height: 1.4; 
             margin: 0;
             white-space: normal;
             word-break: break-word;
-            overflow: visible;
         }
         
         .zh-text { 
             font-size: 0.95rem; 
-            line-height: 1.5;
+            line-height: 1.5; 
             background: rgba(255, 255, 255, 0.15); 
             padding: 8px 14px; 
             border-radius: 12px; 
@@ -79,21 +78,40 @@
             word-break: break-word;
         }
         
-        .controls-card { display: flex; flex-direction: column; gap: 12px; align-items: center; }
-        .btn-group { display: flex; gap: 12px; width: 100%; }
-        button { flex: 1; padding: 14px 20px; font-size: 1.05rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; }
+        .controls-card { display: flex; flex-direction: column; gap: 12px; }
+        .btn-group { display: flex; gap: 10px; width: 100%; }
+        button { flex: 1; padding: 12px 18px; font-size: 1rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; transition: background 0.2s; }
         .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:disabled { background-color: #cbd5e1; }
+        .btn-primary:disabled { background-color: #cbd5e1; cursor: not-allowed; }
         .btn-secondary { background-color: #f1f5f9; color: #475569; }
         .loop-option { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text-muted); cursor: pointer; }
+        
+        /* 篩選與搜尋列 */
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            outline: none;
+            background: #ffffff;
+            color: var(--text-main);
+        }
+        select:focus, input[type="text"]:focus { border-color: var(--primary); }
+
+        /* 句子列表 */
         .list-card { display: flex; flex-direction: column; flex-grow: 1; }
         .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+        .select-all-label { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; color: #1e293b; }
         .sentence-list { display: flex; flex-direction: column; gap: 8px; }
-        .sentence-item { display: flex; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background-color: #ffffff; border: 1px solid var(--border-color); cursor: pointer; }
+        .sentence-item { display: flex; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background-color: #ffffff; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s; }
         .sentence-item.active { background-color: var(--accent-blue); border-color: var(--primary); }
-        .checkbox-custom { width: 22px; height: 22px; margin-right: 12px; margin-top: 2px; accent-color: var(--primary); flex-shrink: 0; }
+        .checkbox-custom { width: 22px; height: 22px; margin-right: 12px; margin-top: 2px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
         
-        /* 句子 ID 編號標籤樣式 */
+        /* 標籤 Badge */
         .id-badge {
             display: inline-block;
             background-color: #e0e7ff;
@@ -102,9 +120,20 @@
             font-weight: 700;
             padding: 2px 8px;
             border-radius: 6px;
-            margin-right: 8px;
+            margin-right: 6px;
             vertical-align: middle;
             font-family: monospace, monospace;
+        }
+        .topic-badge {
+            display: inline-block;
+            background-color: #fef3c7;
+            color: #92400e;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-right: 6px;
+            vertical-align: middle;
         }
         
         .sentence-content { flex-grow: 1; }
@@ -118,54 +147,141 @@
             .app-container { display: grid; grid-template-columns: 380px 1fr; align-items: start; }
             .sticky-section { position: sticky; top: 24px; }
         }
+        @media (max-width: 500px) {
+            .filter-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <header><div style="max-width: 1100px; margin: 0 auto; width: 100%;"><h1>🇮🇳 印地語學習隨身聽</h1></div></header>
+    <header><div style="max-width: 1100px; margin: 0 auto; width: 100%;"><h1>🇮🇳 印地語主題學習隨身聽</h1></div></header>
     <div class="app-container">
+        <!-- 左側固定面板（展示與播放） -->
         <div class="sticky-section">
             <div class="card display-card">
                 <div id="displayHindi" class="hindi-text">請選擇句子</div>
                 <div id="displayRoman" class="roman-text">Select sentences to start</div>
-                <div id="displayZh" class="zh-text">開始聽覺練習</div>
+                <div id="displayZh" class="zh-text">開始主題聽覺練習</div>
             </div>
+            
             <div class="card controls-card">
                 <div class="btn-group">
-                    <button id="playBtn" class="btn-primary" onclick="playSelected()">▶ 播放</button>
+                    <button id="playBtn" class="btn-primary" onclick="playSelected()">▶ 播放勾選句子</button>
                     <button id="pauseBtn" class="btn-secondary" onclick="pauseAudio()" disabled>⏸ 暫停</button>
                 </div>
                 <label class="loop-option"><input type="checkbox" id="loopCheck"> 🔁 循環播放勾選清單 (Loop)</label>
             </div>
+
+            <!-- 主題篩選與搜尋 -->
+            <div class="card">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <span class="filter-label">📚 主題篩選：</span>
+                        <select id="topicFilter" onchange="filterData()">
+                            <option value="ALL">全部主題 (All)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">🔍 關鍵字搜尋：</span>
+                        <input type="text" id="searchInput" placeholder="搜尋主題、中文、印地文..." oninput="filterData()">
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- 右側句子清單 -->
         <div class="card list-card">
-            <div class="list-header"><h3>常用日常句子</h3><span id="selectCount" style="font-size: 0.85rem; color: var(--text-muted);">已選擇 0 句</span></div>
-            <div id="sentenceList" class="sentence-list"><div class="status-msg">⏳ 正在載入語音資料庫...</div></div>
+            <div class="list-header">
+                <label class="select-all-label">
+                    <input type="checkbox" id="selectAllBox" onchange="toggleSelectAll(this.checked)" class="checkbox-custom" style="margin:0;">
+                    <span>全選目前顯示句子</span>
+                </label>
+                <span id="selectCount" style="font-size: 0.85rem; color: var(--text-muted);">已選擇 0 句</span>
+            </div>
+            <div id="sentenceList" class="sentence-list">
+                <div class="status-msg">⏳ 正在載入語音資料庫...</div>
+            </div>
         </div>
     </div>
-    <audio id="audioPlayer"></audio>
-    <script>
 
-        // ⚠️ 請確認此處貼上的是你「發布到網路」的 CSV 連結 ⚠️
+    <audio id="audioPlayer"></audio>
+
+    <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS9BA88Sf3mnAfyLALjFSNAWJEjBCd0A8EiA6JRLuwSMe2JHhT-8vD3nm-7sZKYZ3HOlFLAOfS2Aqd3/pub?gid=0&single=true&output=csv";
 
-       let sentences = [], playQueue = [], currentIndex = 0;
+        let allSentences = [];
+        let filteredSentences = [];
+        let playQueue = [];
+        let currentIndex = 0;
         const audio = document.getElementById('audioPlayer');
 
         function loadSheetsData() {
             if (!CSV_URL || CSV_URL.includes("YOUR_GOOGLE_SHEETS")) return;
             Papa.parse(CSV_URL, {
-                download: true, header: true, skipEmptyLines: true,
+                download: true,
+                header: true,
+                skipEmptyLines: true,
                 complete: function(r) {
-                    sentences = r.data.filter(row => row.hindi && row.hindi.trim() !== '' && row.audio);
-                    renderList();
+                    allSentences = r.data.filter(row => row.hindi && row.hindi.trim() !== '' && row.audio);
+                    buildTopicDropdown();
+                    filterData();
                 }
             });
+        }
+
+        // 依試算表資料動態建立主題下拉選單
+        function buildTopicDropdown() {
+            const topicSelect = document.getElementById('topicFilter');
+            topicSelect.innerHTML = '<option value="ALL">全部主題 (All)</option>';
+            const topicMap = new Map();
+
+            allSentences.forEach(row => {
+                const tId = (row.topic_id || row.Topic_ID || row.topicId || "").toString().trim();
+                const tName = (row.topic_name || row.Topic_Name || row.topicName || "").toString().trim();
+                if (tId && !topicMap.has(tId)) {
+                    topicMap.set(tId, tName ? `#${tId} ${tName}` : `主題 ${tId}`);
+                }
+            });
+
+            topicMap.forEach((displayName, topicId) => {
+                const opt = document.createElement('option');
+                opt.value = topicId;
+                opt.innerText = displayName;
+                topicSelect.appendChild(opt);
+            });
+        }
+
+        // 篩選核心邏輯
+        function filterData() {
+            const selectedTopic = document.getElementById('topicFilter').value;
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            filteredSentences = allSentences.filter(s => {
+                const tId = (s.topic_id || s.Topic_ID || s.topicId || "").toString().trim();
+                const tName = (s.topic_name || s.Topic_Name || s.topicName || "").toString().toLowerCase();
+                const hindi = (s.hindi || "").toString().toLowerCase();
+                const roman = (s.roman || "").toString().toLowerCase();
+                const zh = (s.zh || "").toString().toLowerCase();
+
+                const matchTopic = (selectedTopic === "ALL") || (tId === selectedTopic);
+                const matchQuery = !query || tId.includes(query) || tName.includes(query) || hindi.includes(query) || roman.includes(query) || zh.includes(query);
+
+                return matchTopic && matchQuery;
+            });
+
+            renderList();
         }
 
         function renderList() {
             const listDiv = document.getElementById('sentenceList');
             listDiv.innerHTML = '';
-            sentences.forEach((s, idx) => {
+
+            if (filteredSentences.length === 0) {
+                listDiv.innerHTML = '<div class="status-msg">查無符合條件的句子</div>';
+                updateSelectCount();
+                return;
+            }
+
+            filteredSentences.forEach((s, idx) => {
                 const item = document.createElement('div');
                 item.className = 'sentence-item';
                 item.id = `item-${idx}`;
@@ -173,24 +289,48 @@
                     if (e.target.tagName !== 'INPUT') {
                         const cb = item.querySelector('.checkbox-custom');
                         cb.checked = !cb.checked;
+                        updateSelectCount();
                     }
-                    updateSelectCount();
                 };
                 
-                // 取得 A 欄的 ID 欄位 (支援 id, ID, Id 等大小寫)
                 const sentenceId = s.id || s.ID || s.Id || (idx + 1);
+                const topicId = (s.topic_id || s.Topic_ID || s.topicId || "").toString().trim();
+                const topicName = (s.topic_name || s.Topic_Name || s.topicName || "").toString().trim();
                 
-                item.innerHTML = `<input type="checkbox" class="checkbox-custom select-box" value="${idx}" onchange="updateSelectCount()">
+                item.innerHTML = `
+                    <input type="checkbox" class="checkbox-custom select-box" value="${idx}" onchange="updateSelectCount()">
                     <div class="sentence-content">
-                        <div class="sentence-hindi"><span class="id-badge">#${sentenceId}</span>${s.hindi}</div>
+                        <div class="sentence-hindi">
+                            <span class="id-badge">#${sentenceId}</span>
+                            ${topicId ? `<span class="topic-badge">主題 ${topicId}${topicName ? ' · ' + topicName : ''}</span>` : ''}
+                            ${s.hindi}
+                        </div>
                         <div class="sentence-sub">${s.roman ? s.roman + ' • ' : ''}${s.zh || ''}</div>
-                    </div>`;
+                    </div>
+                `;
                 listDiv.appendChild(item);
             });
+
+            document.getElementById('selectAllBox').checked = false;
+            updateSelectCount();
+        }
+
+        // 全選 / 取消全選
+        function toggleSelectAll(isChecked) {
+            document.querySelectorAll('.select-box').forEach(cb => cb.checked = isChecked);
+            updateSelectCount();
         }
 
         function updateSelectCount() {
-            document.getElementById('selectCount').innerText = `已選擇 ${document.querySelectorAll('.select-box:checked').length} 句`;
+            const checkedCount = document.querySelectorAll('.select-box:checked').length;
+            document.getElementById('selectCount').innerText = `共 ${filteredSentences.length} 句 / 已選 ${checkedCount} 句`;
+            
+            const selectAllBox = document.getElementById('selectAllBox');
+            if (filteredSentences.length > 0 && checkedCount === filteredSentences.length) {
+                selectAllBox.checked = true;
+            } else {
+                selectAllBox.checked = false;
+            }
         }
 
         function playSelected() {
@@ -203,9 +343,9 @@
         }
 
         function loadAndPlay(index) {
-            const s = sentences[index];
+            const s = filteredSentences[index];
+            if (!s) return;
             
-            // 完整無截斷地顯示所有文字
             document.getElementById('displayHindi').innerText = s.hindi;
             document.getElementById('displayRoman').innerText = s.roman || '';
             document.getElementById('displayZh').innerText = s.zh || '';
@@ -217,11 +357,10 @@
                 activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
-            // 讀取相對路徑音檔
             audio.src = s.audio.trim();
             audio.play().catch(e => {
                 console.error("播放失敗:", e);
-                alert('音檔載入失敗！請確認檔案路徑（例如 audio/0001.mp3）並確認檔案已上傳至 GitHub。');
+                alert('音檔載入失敗！請確認檔案路徑並確認檔案已上傳至 GitHub。');
             });
         }
 
