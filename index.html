@@ -42,100 +42,108 @@
             display: flex; 
             flex-direction: column; 
         }
-        header { 
+
+        
+      header { 
     text-align: center; 
-    padding: 10px 4px 6px 4px; 
+    padding: 12px 0 14px 0; 
 }
 
 header h1 { 
     margin: 0; 
-    font-size: 1.2rem; /* 微調字體大小，確保在手機上能單行完整顯示 */
+    font-size: 1.45rem; 
+    font-weight: 800;
     color: #1e3a8a; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    gap: 4px; /* 縮小文字與圖示間距 */
-    white-space: nowrap; /* 核心修正：強制整行顯示，絕不讓單字斷行 */
-    word-break: keep-all; 
+    gap: 8px;
+    letter-spacing: 0.5px;
 }
 
-.refresh-btn {
-    background: none;
-    border: none;
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 2px 4px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    color: #1e3a8a;
-    flex-shrink: 0; /* 確保按鈕不會被擠壓 */
+.app-container { width: 100%; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; flex-grow: 1; }
+.card { background: var(--bg-card); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+.sticky-section { display: flex; flex-direction: column; gap: 14px; }
+
+.display-card { 
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); 
+    color: white; 
+    text-align: center; 
+    min-height: 180px; 
+    height: auto;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    padding: 20px 16px; 
+    border: none; 
+    gap: 10px;
 }
 
-/* 針對較小尺寸手機（如 iPhone SE 等）的自動最適化 */
-@media (max-width: 380px) {
-    header h1 {
-        font-size: 1.05rem;
-    }
+.hindi-text { 
+    font-size: 1.35rem; 
+    font-weight: 700; 
+    margin: 0; 
+    line-height: 1.5; 
+    white-space: normal;
+    word-break: break-word;
 }
-        .refresh-btn:active { opacity: 0.5; }
 
-        .app-container { width: 100%; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; flex-grow: 1; }
-        .card { background: var(--bg-card); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
-        .sticky-section { display: flex; flex-direction: column; gap: 14px; }
-        
-        .display-card { 
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); 
-            color: white; 
-            text-align: center; 
-            min-height: 180px; 
-            height: auto;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 20px 16px; 
-            border: none; 
-            gap: 10px;
-        }
-        
-        .hindi-text { 
-            font-size: 1.35rem; 
-            font-weight: 700; 
-            margin: 0; 
-            line-height: 1.5; 
-            white-space: normal;
-            word-break: break-word;
-        }
-        
-        .roman-text { 
-            font-size: 1rem; 
-            opacity: 0.9; 
-            font-style: italic; 
-            line-height: 1.4; 
-            margin: 0;
-            white-space: normal;
-            word-break: break-word;
-        }
-        
-        .zh-text { 
-            font-size: 0.95rem; 
-            line-height: 1.5; 
-            background: rgba(255, 255, 255, 0.15); 
-            padding: 8px 14px; 
-            border-radius: 12px; 
-            white-space: normal;
-            word-break: break-word;
-        }
-        
-        .controls-card { display: flex; flex-direction: column; gap: 12px; }
-        .btn-group { display: flex; gap: 10px; width: 100%; }
-        button { flex: 1; padding: 12px 18px; font-size: 1rem; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; transition: background 0.2s; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:disabled { background-color: #cbd5e1; cursor: not-allowed; }
-        .btn-secondary { background-color: #f1f5f9; color: #475569; }
+.roman-text { 
+    font-size: 1rem; 
+    opacity: 0.9; 
+    font-style: italic; 
+    line-height: 1.4; 
+    margin: 0;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.zh-text { 
+    font-size: 0.95rem; 
+    line-height: 1.5; 
+    background: rgba(255, 255, 255, 0.15); 
+    padding: 8px 14px; 
+    border-radius: 12px; 
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* 重新整理移到下方後的按鈕列新樣式 */
+.controls-card { display: flex; flex-direction: column; gap: 12px; }
+.btn-group { display: flex; gap: 8px; width: 100%; }
+
+.btn-primary { 
+    flex: 2; 
+    padding: 12px 10px; 
+    font-size: 0.95rem; 
+    font-weight: 700; 
+    border-radius: 12px; 
+    border: none; 
+    cursor: pointer; 
+    background-color: var(--primary); 
+    color: white; 
+    white-space: nowrap;
+}
+
+.btn-secondary { 
+    flex: 1; 
+    padding: 12px 6px; 
+    font-size: 0.9rem; 
+    font-weight: 600; 
+    border-radius: 12px; 
+    border: 1px solid var(--border-color); 
+    cursor: pointer; 
+    background-color: #f8fafc; 
+    color: #475569; 
+    white-space: nowrap;
+}
+
+.btn-primary:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+.btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary:active { background-color: #e2e8f0; }
+
+
         .loop-option { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text-muted); cursor: pointer; }
         
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -249,10 +257,11 @@ header h1 {
 </head>
 <body>
     <header>
-        <div style="max-width: 1100px; margin: 0 auto; width: 100%;">
-            <h1>🇮🇳 印地語主題學習隨身聽 <button class="refresh-btn" onclick="location.reload(true)" title="重新整理">🔄</button></h1>
-        </div>
-    </header>
+    <div style="max-width: 1100px; margin: 0 auto; width: 100%;">
+        <h1>🇮🇳 印地語主題學習隨身聽</h1>
+    </div>
+</header>
+
     <div class="app-container">
         <div class="sticky-section">
             <div class="card display-card">
@@ -263,9 +272,10 @@ header h1 {
             
             <div class="card controls-card">
                 <div class="btn-group">
-                    <button id="playBtn" class="btn-primary" onclick="playSelected()">▶ 播放勾選句子</button>
-                    <button id="pauseBtn" class="btn-secondary" onclick="pauseAudio()" disabled>⏸ 暫停</button>
-                </div>
+    <button id="playBtn" class="btn-primary" onclick="playSelected()">▶ 播放勾選句子</button>
+    <button id="pauseBtn" class="btn-secondary" onclick="pauseAudio()" disabled>⏸ 暫停</button>
+    <button id="refreshBtn" class="btn-secondary" onclick="location.reload(true)">🔄 重整</button>
+</div>
                 <label class="loop-option"><input type="checkbox" id="loopCheck"> 🔁 循環播放勾選清單 (Loop)</label>
             </div>
 
