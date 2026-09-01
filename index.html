@@ -177,6 +177,52 @@
         @media (max-width: 500px) {
             .filter-grid { grid-template-columns: 1fr; }
         }
+
+/* 💡 自訂多選下拉選單樣式 */
+.dropdown-btn {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    z-index: 999;
+    margin-top: 4px;
+    padding: 6px 0;
+}
+.dropdown-menu.show { display: block; }
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    user-select: none;
+    transition: background 0.15s;
+}
+.dropdown-item:hover { background-color: var(--accent-blue); }
+.dropdown-header-item { background-color: #f8fafc; border-bottom: 1px solid var(--border-color); }
+.dropdown-divider { height: 1px; background-color: var(--border-color); margin: 4px 0; }
+
     </style>
 </head>
 <body>
@@ -203,12 +249,24 @@
 
             <div class="card">
                 <div class="filter-grid">
-                    <div class="filter-group">
-                        <span class="filter-label">📚 主題篩選：</span>
-                        <select id="topicFilter" onchange="filterData()">
-                            <option value="ALL">全部主題 (All)</option>
-                        </select>
-                    </div>
+                   
+                    <div class="filter-group" style="position: relative;">
+    <span class="filter-label">📚 主題篩選：</span>
+    <button type="button" id="topicDropdownBtn" class="dropdown-btn" onclick="toggleTopicDropdown(event)">
+        <span id="topicBtnText">全部主題 (All)</span>
+        <span style="font-size: 0.8rem; margin-left: 6px;">▼</span>
+    </button>
+    
+    <!-- 多選浮動選單區塊 -->
+    <div id="topicDropdownMenu" class="dropdown-menu">
+        <label class="dropdown-item dropdown-header-item">
+            <input type="checkbox" id="selectAllTopicsBox" onchange="toggleSelectAllTopics(this.checked)" class="checkbox-custom" style="margin:0;">
+            <span style="font-weight: 700;">全選全部主題</span>
+        </label>
+        <div class="dropdown-divider"></div>
+        <div id="topicCheckboxList"></div>
+    </div>
+</div>
                     <div class="filter-group">
                         <span class="filter-label">🔍 關鍵字搜尋：</span>
                         <input type="text" id="searchInput" placeholder="搜尋主題、中文、印地文..." oninput="filterData()">
@@ -256,46 +314,125 @@
             });
         }
 
-        function buildTopicDropdown() {
-            const topicSelect = document.getElementById('topicFilter');
-            topicSelect.innerHTML = '<option value="ALL">全部主題 (All)</option>';
-            const topicMap = new Map();
+        var selectedTopicIds = []; // 儲存當前勾選的主題 ID
 
-            allSentences.forEach(row => {
-                const tId = (row.topic_id || row.Topic_ID || row.topicId || "").toString().trim();
-                const tName = (row.topic_name || row.Topic_Name || row.topicName || "").toString().trim();
-                if (tId && !topicMap.has(tId)) {
-                    topicMap.set(tId, tName ? `#${tId} ${tName}` : `主題 ${tId}`);
-                }
-            });
+// 建立主題選項
+function buildTopicDropdown() {
+    var topicListDiv = document.getElementById('topicCheckboxList');
+    if (!topicListDiv) return;
+    topicListDiv.innerHTML = '';
+    var topicMap = new Map();
 
-            topicMap.forEach((displayName, topicId) => {
-                const opt = document.createElement('option');
-                opt.value = topicId;
-                opt.innerText = displayName;
-                topicSelect.appendChild(opt);
-            });
+    allSentences.forEach(function(row) {
+        var tId = (row.topic_id || row.Topic_ID || row.topicId || "").toString().trim();
+        var tName = (row.topic_name || row.Topic_Name || row.topicName || "").toString().trim();
+        if (tId && !topicMap.has(tId)) {
+            topicMap.set(tId, tName ? ('#' + tId + ' ' + tName) : ('主題 ' + tId));
         }
+    });
 
-        function filterData() {
-            const selectedTopic = document.getElementById('topicFilter').value;
-            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    // 預設全選所有主題 ID
+    selectedTopicIds = Array.from(topicMap.keys());
 
-            filteredSentences = allSentences.filter(s => {
-                const tId = (s.topic_id || s.Topic_ID || s.topicId || "").toString().trim();
-                const tName = (s.topic_name || s.Topic_Name || s.topicName || "").toString().toLowerCase();
-                const hindi = (s.hindi || "").toString().toLowerCase();
-                const roman = (s.roman || "").toString().toLowerCase();
-                const zh = (s.zh || "").toString().toLowerCase();
+    topicMap.forEach(function(displayName, topicId) {
+        var label = document.createElement('label');
+        label.className = 'dropdown-item';
+        label.innerHTML = '<input type="checkbox" class="checkbox-custom topic-box" value="' + topicId + '" checked onchange="onTopicCheckChange()">' +
+                          '<span>' + displayName + '</span>';
+        topicListDiv.appendChild(label);
+    });
 
-                const matchTopic = (selectedTopic === "ALL") || (tId === selectedTopic);
-                const matchQuery = !query || tId.includes(query) || tName.includes(query) || hindi.includes(query) || roman.includes(query) || zh.includes(query);
+    var selectAllBox = document.getElementById('selectAllTopicsBox');
+    if (selectAllBox) selectAllBox.checked = true;
+    updateTopicBtnText();
+}
 
-                return matchTopic && matchQuery;
-            });
+// 切換選單顯示/隱藏
+function toggleTopicDropdown(event) {
+    if (event && event.stopPropagation) event.stopPropagation();
+    var menu = document.getElementById('topicDropdownMenu');
+    if (menu) menu.classList.toggle('show');
+}
 
-            renderList();
-        }
+// 全選 / 取消全選主題
+function toggleSelectAllTopics(isChecked) {
+    var boxes = document.querySelectorAll('.topic-box');
+    for (var i = 0; i < boxes.length; i++) {
+        boxes[i].checked = isChecked;
+    }
+    onTopicCheckChange();
+}
+
+// 當勾選主題變更時
+function onTopicCheckChange() {
+    var checkedBoxes = document.querySelectorAll('.topic-box:checked');
+    var totalBoxes = document.querySelectorAll('.topic-box');
+    
+    selectedTopicIds = [];
+    for (var i = 0; i < checkedBoxes.length; i++) {
+        selectedTopicIds.push(checkedBoxes[i].value);
+    }
+    
+    var selectAllBox = document.getElementById('selectAllTopicsBox');
+    if (selectAllBox) {
+        selectAllBox.checked = (totalBoxes.length > 0 && checkedBoxes.length === totalBoxes.length);
+    }
+
+    updateTopicBtnText();
+    filterData();
+}
+
+// 更新按鈕文字顯示
+function updateTopicBtnText() {
+    var totalBoxes = document.querySelectorAll('.topic-box');
+    var checkedCount = selectedTopicIds.length;
+    var btnText = document.getElementById('topicBtnText');
+    if (!btnText) return;
+
+    if (checkedCount === totalBoxes.length || totalBoxes.length === 0) {
+        btnText.innerText = '全部主題 (All)';
+    } else if (checkedCount === 0) {
+        btnText.innerText = '未選擇主題';
+    } else {
+        btnText.innerText = '已選擇 ' + checkedCount + ' 個主題';
+    }
+}
+
+// 點擊頁面其他地方時自動關閉下拉選單
+document.addEventListener('click', function(e) {
+    var dropdown = document.querySelector('.filter-group');
+    var menu = document.getElementById('topicDropdownMenu');
+    if (dropdown && menu && !dropdown.contains(e.target)) {
+        menu.classList.remove('show');
+    }
+});
+
+        // 根據多選主題過濾資料
+function filterData() {
+    var queryInput = document.getElementById('searchInput');
+    var query = queryInput ? queryInput.value.trim().toLowerCase() : '';
+
+    filteredSentences = allSentences.filter(function(s) {
+        var tId = (s.topic_id || s.Topic_ID || s.topicId || "").toString().trim();
+        var tName = (s.topic_name || s.Topic_Name || s.topicName || "").toString().toLowerCase();
+        var hindi = (s.hindi || "").toString().toLowerCase();
+        var roman = (s.roman || "").toString().toLowerCase();
+        var zh = (s.zh || "").toString().toLowerCase();
+
+        // 判斷主題是否在已勾選的列表內
+        var matchTopic = selectedTopicIds.indexOf(tId) !== -1;
+        var matchQuery = !query || 
+            tId.indexOf(query) !== -1 || 
+            tName.indexOf(query) !== -1 || 
+            hindi.indexOf(query) !== -1 || 
+            roman.indexOf(query) !== -1 || 
+            zh.indexOf(query) !== -1;
+
+        return matchTopic && matchQuery;
+    });
+
+    renderList();
+}
 
         function renderList() {
             const listDiv = document.getElementById('sentenceList');
