@@ -1,1699 +1,610 @@
-<!DOCTYPE
-html>
-
+<!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
-user-scalable=no, viewport-fit=cover">
-
-    <title>印地語學習隨身聽</title>
-
-    <meta
-name="apple-mobile-web-app-capable" content="yes">
-
-    <meta name="apple-mobile-web-app-status-bar-style"
-content="black-translucent">
-
-    <meta
-name="apple-mobile-web-app-title" content="印地語隨身聽">
-
-    <meta name="theme-color"
-content="#1e3a8a">
-
-    <!-- 🍎 指向實際 PNG 檔案 (iOS 最標準、相容性最高的寫法) -->
-
-    <link rel="apple-touch-icon"
-href="apple-touch-icon.png">
-
-    <link rel="icon"
-type="image/png" href="apple-touch-icon.png">
-
-    <script
-src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-
-    <style>
-
-/* AI 按鈕樣式 */
-
-.ai-explain-btn {
-
-    position: absolute;
-
-    top: 12px;
-
-    right: 12px;
-
-    background: rgba(255, 255, 255, 0.25);
-
-    color: white;
-
-    border: 1px solid rgba(255, 255, 255, 0.4);
-
-    padding: 5px 12px;
-
-    border-radius: 20px;
-
-    cursor: pointer;
-
-    font-size: 13px;
-
-    font-weight: bold;
-
-    backdrop-filter: blur(4px);
-
-    transition: all 0.2s ease;
-
-}
-
-.ai-explain-btn:hover {
-
-    background: rgba(255, 255, 255, 0.45);
-
-    transform: scale(1.05);
-
-}
-
-/* Modal 彈出視窗 */
-
-.modal-overlay {
-
-    position: fixed;
-
-    top: 0; left: 0; width: 100%; height: 100%;
-
-    background: rgba(0, 0, 0, 0.6);
-
-    z-index: 9999;
-
-    display: flex; justify-content: center;
-align-items: center;
-
-}
-
-.modal-content {
-
-    background: white;
-
-    width: 90%; max-width: 700px; max-height:
-85vh;
-
-    border-radius: 16px;
-
-    display: flex; flex-direction: column;
-
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-
-    overflow: hidden;
-
-}
-
-.modal-header {
-
-    padding: 16px 20px; background: #1e40af;
-color: white;
-
-    display: flex; justify-content:
-space-between; align-items: center;
-
-}
-
-.modal-body { padding: 20px; overflow-y: auto; font-size:
-15px; line-height: 1.7; color: #334155; }
-
-.close-btn { font-size: 24px; cursor: pointer; color:
-white; }
-
-/* 發音元件樣式 */
-
-.ai-section { background: #f8fafc; border-left: 4px solid
-#2563eb; padding: 12px; margin: 12px 0; border-radius: 0 8px 8px 0; }
-
-.ai-section-title { font-weight: bold; color: #1e3a8a;
-margin-bottom: 8px; }
-
-.ai-textbox {
-
-    display: inline-flex; align-items: center;
-gap: 8px;
-
-    background: #eff6ff; border: 1px solid
-#bfdbfe; padding: 6px 12px;
-
-    border-radius: 8px; margin: 4px 0; cursor:
-pointer;
-
-}
-
-.ai-textbox:hover { background: #dbeafe; }
-
-
-
-    /* 💡 全選區域上下兩行佈局最適化 */
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>印地語學習隨身聽</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="印地語隨身聽">
+    <meta name="theme-color" content="#1e3a8a">
+
+    <!-- 🍎 指向實際 PNG 檔案 (iOS 最標準、相容性最高的寫法) -->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="apple-touch-icon.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+
+    /* 💡 全選區域上下兩行佈局最適化 */
 .select-all-label {
-
-    display: flex;
-
-    align-items: center; /* 讓 Checkbox 垂直居中對齊 */
-
-    gap: 10px;
-
-    cursor: pointer;
-
-    user-select: none;
-
-    padding: 4px 0;
-
+    display: flex;
+    align-items: center; /* 讓 Checkbox 垂直居中對齊 */
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 0;
 }
 
 .select-all-text-group {
-
-    display: flex;
-
-    flex-direction: column; /* 強制文字垂直排列成上下兩行 */
-
-    justify-content: center;
-
-    gap: 2px; /* 上下兩行之間的微小間距 */
-
+    display: flex;
+    flex-direction: column; /* 強制文字垂直排列成上下兩行 */
+    justify-content: center;
+    gap: 2px; /* 上下兩行之間的微小間距 */
 }
 
 .select-all-title {
-
-    font-weight: 700;
-
-    font-size: 0.95rem;
-
-    color: var(--text-main);
-
-    white-space: nowrap; /* 確保標題絕對不掉字換行 */
-
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    white-space: nowrap; /* 確保標題絕對不掉字換行 */
 }
 
 .select-all-stats {
-
-    font-size: 0.8rem;
-
-    color: #64748b; /* 質感灰色 */
-
-    font-weight: 500;
-
+    font-size: 0.8rem;
+    color: #64748b; /* 質感灰色 */
+    font-weight: 500;
 }
 
-        :root { 
+        :root { 
+            --primary: #2563eb; 
+            --primary-dark: #1e40af; 
+            --bg-body: #f8fafc; 
+            --bg-card: #ffffff; 
+            --text-main: #0f172a; 
+            --text-muted: #64748b; 
+            --accent-blue: #eff6ff; 
+            --border-color: #e2e8f0; 
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
+            margin: 0; 
+            padding: 12px; 
+            padding-top: env(safe-area-inset-top, 12px);
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
 
-            --primary:
-#2563eb; 
-
-            --primary-dark:
-#1e40af; 
-
-            --bg-body:
-#f8fafc; 
-
-            --bg-card:
-#ffffff; 
-
-            --text-main:
-#0f172a; 
-
-            --text-muted:
-#64748b; 
-
-            --accent-blue:
-#eff6ff; 
-
-            --border-color:
-#e2e8f0; 
-
-        }
-
-        * { box-sizing: border-box;
--webkit-tap-highlight-color: transparent; }
-
-        body { 
-
-            font-family:
--apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial,
-sans-serif; 
-
-            margin: 0; 
-
-            padding: 12px; 
-
-            padding-top:
-env(safe-area-inset-top, 12px);
-
-            padding-bottom:
-env(safe-area-inset-bottom, 16px);
-
-           
-background-color: var(--bg-body); 
-
-            color:
-var(--text-main); 
-
-            min-height:
-100vh; 
-
-            display: flex; 
-
-            flex-direction:
-column; 
-
-        }
-
-      header { 
-
-    text-align: center; 
-
-    padding: 12px 0 14px 0; 
-
+      header { 
+    text-align: center; 
+    padding: 12px 0 14px 0; 
 }
 
 header h1 { 
-
-    margin: 0; 
-
-    font-size: 1.45rem; 
-
-    font-weight: 800;
-
-    color: #1e3a8a; 
-
-    display: flex; 
-
-    align-items: center; 
-
-    justify-content: center; 
-
-    gap: 8px;
-
-    letter-spacing: 0.5px;
-
+    margin: 0; 
+    font-size: 1.45rem; 
+    font-weight: 800;
+    color: #1e3a8a; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 8px;
+    letter-spacing: 0.5px;
 }
 
-.app-container { width: 100%; max-width: 1100px; margin:
-0 auto; display: flex; flex-direction: column; gap: 14px; flex-grow: 1; }
-
-.card { background: var(--bg-card); border-radius: 16px;
-padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid
-var(--border-color); }
-
-.sticky-section { display: flex; flex-direction: column;
-gap: 14px; }
+.app-container { width: 100%; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; flex-grow: 1; }
+.card { background: var(--bg-card); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+.sticky-section { display: flex; flex-direction: column; gap: 14px; }
 
 .display-card { 
-
-    background: linear-gradient(135deg, #1e3a8a
-0%, #2563eb 100%); 
-
-    color: white; 
-
-    text-align: center; 
-
-    min-height: 180px; 
-
-    height: auto;
-
-    display: flex; 
-
-    flex-direction: column; 
-
-    justify-content: center; 
-
-    align-items: center; 
-
-    padding: 20px 16px; 
-
-    border: none; 
-
-    gap: 10px;
-
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); 
+    color: white; 
+    text-align: center; 
+    min-height: 180px; 
+    height: auto;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    padding: 20px 16px; 
+    border: none; 
+    gap: 10px;
 }
 
 .hindi-text { 
-
-    font-size: 1.35rem; 
-
-    font-weight: 700; 
-
-    margin: 0; 
-
-    line-height: 1.5; 
-
-    white-space: normal;
-
-    word-break: break-word;
-
+    font-size: 1.35rem; 
+    font-weight: 700; 
+    margin: 0; 
+    line-height: 1.5; 
+    white-space: normal;
+    word-break: break-word;
 }
 
 .roman-text { 
-
-    font-size: 1rem; 
-
-    opacity: 0.9; 
-
-    font-style: italic; 
-
-    line-height: 1.4; 
-
-    margin: 0;
-
-    white-space: normal;
-
-    word-break: break-word;
-
+    font-size: 1rem; 
+    opacity: 0.9; 
+    font-style: italic; 
+    line-height: 1.4; 
+    margin: 0;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .zh-text { 
-
-    font-size: 0.95rem; 
-
-    line-height: 1.5; 
-
-    background: rgba(255, 255, 255, 0.15); 
-
-    padding: 8px 14px; 
-
-    border-radius: 12px; 
-
-    white-space: normal;
-
-    word-break: break-word;
-
+    font-size: 0.95rem; 
+    line-height: 1.5; 
+    background: rgba(255, 255, 255, 0.15); 
+    padding: 8px 14px; 
+    border-radius: 12px; 
+    white-space: normal;
+    word-break: break-word;
 }
 
 /* 重新整理移到下方後的按鈕列新樣式 */
-
-.controls-card { display: flex; flex-direction: column;
-gap: 12px; }
-
+.controls-card { display: flex; flex-direction: column; gap: 12px; }
 .btn-group { display: flex; gap: 8px; width: 100%; }
 
 .btn-primary { 
-
-    flex: 2; 
-
-    padding: 12px 10px; 
-
-    font-size: 0.95rem; 
-
-    font-weight: 700; 
-
-    border-radius: 12px; 
-
-    border: none; 
-
-    cursor: pointer; 
-
-    background-color: var(--primary); 
-
-    color: white; 
-
-    white-space: nowrap;
-
+    flex: 2; 
+    padding: 12px 10px; 
+    font-size: 0.95rem; 
+    font-weight: 700; 
+    border-radius: 12px; 
+    border: none; 
+    cursor: pointer; 
+    background-color: var(--primary); 
+    color: white; 
+    white-space: nowrap;
 }
 
 .btn-secondary { 
-
-    flex: 1; 
-
-    padding: 12px 6px; 
-
-    font-size: 0.9rem; 
-
-    font-weight: 600; 
-
-    border-radius: 12px; 
-
-    border: 1px solid var(--border-color); 
-
-    cursor: pointer; 
-
-    background-color: #f8fafc; 
-
-    color: #475569; 
-
-    white-space: nowrap;
-
+    flex: 1; 
+    padding: 12px 6px; 
+    font-size: 0.9rem; 
+    font-weight: 600; 
+    border-radius: 12px; 
+    border: 1px solid var(--border-color); 
+    cursor: pointer; 
+    background-color: #f8fafc; 
+    color: #475569; 
+    white-space: nowrap;
 }
 
-.btn-primary:disabled { background-color: #cbd5e1;
-cursor: not-allowed; }
-
-.btn-secondary:disabled { opacity: 0.5; cursor:
-not-allowed; }
-
+.btn-primary:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+.btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-secondary:active { background-color: #e2e8f0; }
 
-        .loop-option { display: flex;
-align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text-muted);
-cursor: pointer; }
+        .loop-option { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--text-muted); cursor: pointer; }
+        
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            outline: none;
+            background: #ffffff;
+            color: var(--text-main);
+        }
+        select:focus, input[type="text"]:focus { border-color: var(--primary); }
 
-        .filter-grid { display: grid;
-grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        .filter-group { display:
-flex; flex-direction: column; gap: 4px; }
-
-        .filter-label { font-size:
-0.8rem; font-weight: 700; color: var(--text-muted); }
-
-        select,
-input[type="text"] {
-
-            width: 100%;
-
-            padding: 10px
-12px;
-
-            border-radius:
-10px;
-
-            border: 1px
-solid var(--border-color);
-
-            font-size:
-0.95rem;
-
-            outline: none;
-
-            background:
-#ffffff;
-
-            color:
-var(--text-main);
-
-        }
-
-        select:focus,
-input[type="text"]:focus { border-color: var(--primary); }
-
-        .list-card { display: flex;
-flex-direction: column; flex-grow: 1; }
-
-        .list-header { display: flex;
-justify-content: space-between; align-items: center; margin-bottom: 12px;
-padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
-
-        .select-all-label { display:
-flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 600;
-cursor: pointer; color: #1e293b; }
-
-        .sentence-list { display:
-flex; flex-direction: column; gap: 8px; }
-
-        .sentence-item { display:
-flex; align-items: flex-start; padding: 12px 14px; border-radius: 12px;
-background-color: #ffffff; border: 1px solid var(--border-color); cursor:
-pointer; transition: all 0.2s; }
-
-        .sentence-item.active {
-background-color: var(--accent-blue); border-color: var(--primary); }
-
-        .checkbox-custom { width:
-22px; height: 22px; margin-right: 12px; margin-top: 2px; accent-color:
-var(--primary); flex-shrink: 0; cursor: pointer; }
-
-        .id-badge {
-
-            display:
-inline-block;
-
-           
-background-color: #e0e7ff;
-
-            color: #3730a3;
-
-            font-size: 0.8rem;
-
-            font-weight:
-700;
-
-            padding: 2px
-8px;
-
-            border-radius:
-6px;
-
-            margin-right:
-6px;
-
-            vertical-align:
-middle;
-
-            font-family:
-monospace, monospace;
-
-        }
-
-        .topic-badge {
-
-            display:
-inline-block;
-
-           
-background-color: #fef3c7;
-
-            color: #92400e;
-
-            font-size:
-0.75rem;
-
-            font-weight:
-700;
-
-            padding: 2px
-8px;
-
-            border-radius:
-6px;
-
-            margin-right:
-6px;
-
-            vertical-align:
-middle;
-
-        }
-
-        .sentence-content {
-flex-grow: 1; }
-
-        .sentence-hindi { font-size:
-1.15rem; font-weight: 700; color: #1e293b; line-height: 1.4; }
-
-        .sentence-sub { font-size:
-0.9rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
-
-        .status-msg { text-align:
-center; padding: 40px 20px; color: var(--text-muted); }
-
-        @media (min-width: 768px) {
-
-            body { padding:
-24px; }
-
-            header {
-text-align: left; }
-
-            .app-container
-{ display: grid; grid-template-columns: 380px 1fr; align-items: start; }
-
-            .sticky-section
-{ position: sticky; top: 24px; }
-
-        }
-
-        @media (max-width: 500px) {
-
-            .filter-grid {
-grid-template-columns: 1fr; }
-
-        }
+        .list-card { display: flex; flex-direction: column; flex-grow: 1; }
+        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+        .select-all-label { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; color: #1e293b; }
+        .sentence-list { display: flex; flex-direction: column; gap: 8px; }
+        .sentence-item { display: flex; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background-color: #ffffff; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s; }
+        .sentence-item.active { background-color: var(--accent-blue); border-color: var(--primary); }
+        .checkbox-custom { width: 22px; height: 22px; margin-right: 12px; margin-top: 2px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
+        
+        .id-badge {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #3730a3;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-right: 6px;
+            vertical-align: middle;
+            font-family: monospace, monospace;
+        }
+        .topic-badge {
+            display: inline-block;
+            background-color: #fef3c7;
+            color: #92400e;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        
+        .sentence-content { flex-grow: 1; }
+        .sentence-hindi { font-size: 1.15rem; font-weight: 700; color: #1e293b; line-height: 1.4; }
+        .sentence-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+        .status-msg { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        
+        @media (min-width: 768px) {
+            body { padding: 24px; }
+            header { text-align: left; }
+            .app-container { display: grid; grid-template-columns: 380px 1fr; align-items: start; }
+            .sticky-section { position: sticky; top: 24px; }
+        }
+        @media (max-width: 500px) {
+            .filter-grid { grid-template-columns: 1fr; }
+        }
 
 /* 💡 自訂多選下拉選單樣式 */
-
 .dropdown-btn {
-
-    width: 100%;
-
-    padding: 10px 12px;
-
-    border-radius: 10px;
-
-    border: 1px solid var(--border-color);
-
-    background: #ffffff;
-
-    color: var(--text-main);
-
-    font-size: 0.95rem;
-
-    text-align: left;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    cursor: pointer;
-
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
 }
-
 .dropdown-menu {
-
-    display: none;
-
-    position: absolute;
-
-    top: 100%;
-
-    left: 0;
-
-    width: 100%;
-
-    max-height: 250px;
-
-    overflow-y: auto;
-
-    background: #ffffff;
-
-    border: 1px solid var(--border-color);
-
-    border-radius: 12px;
-
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-
-    z-index: 999;
-
-    margin-top: 4px;
-
-    padding: 6px 0;
-
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    z-index: 999;
+    margin-top: 4px;
+    padding: 6px 0;
 }
-
 .dropdown-menu.show { display: block; }
-
 .dropdown-item {
-
-    display: flex;
-
-    align-items: center;
-
-    padding: 8px 12px;
-
-    cursor: pointer;
-
-    font-size: 0.9rem;
-
-    user-select: none;
-
-    transition: background 0.15s;
-
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    user-select: none;
+    transition: background 0.15s;
 }
+.dropdown-item:hover { background-color: var(--accent-blue); }
+.dropdown-header-item { background-color: #f8fafc; border-bottom: 1px solid var(--border-color); }
+.dropdown-divider { height: 1px; background-color: var(--border-color); margin: 4px 0; }
 
-.dropdown-item:hover { background-color:
-var(--accent-blue); }
-
-.dropdown-header-item { background-color: #f8fafc;
-border-bottom: 1px solid var(--border-color); }
-
-.dropdown-divider { height: 1px; background-color:
-var(--border-color); margin: 4px 0; }
-
-    </style>
-
+    </style>
 </head>
-
 <body>
-
-    <header>
-
-    <div style="max-width: 1100px;
-margin: 0 auto; width: 100%;">
-
-        <h1>🇮🇳 印地語主題學習隨身聽</h1>
-
-    </div>
-
+    <header>
+    <div style="max-width: 1100px; margin: 0 auto; width: 100%;">
+        <h1>🇮🇳 印地語主題學習隨身聽</h1>
+    </div>
 </header>
 
-    <div class="app-container">
-
-        <div
-class="sticky-section">
-
-
-           <div
-class="card display-card" style="position: relative;">
-
-               
-<!-- 💡 1. 在這裡加入 AI 解釋按鈕 -->
-
-               
-<button class="ai-explain-btn"
-onclick="explainCurrentSentence()">💡 AI 解釋</button>
-
-               
-<div id="displayHindi" class="hindi-text">請選擇句子</div>
-
-               
-<div id="displayRoman" class="roman-text">Select
-sentences to start</div>
-
-               
-<div id="displayZh" class="zh-text">開始主題聽覺練習</div>
-
-            </div>
-
-
-
-            <div class="card
-controls-card">
-
-               
-<div class="btn-group">
-
-    <button id="playBtn"
-class="btn-primary" onclick="playSelected()">▶ 播放勾選句子</button>
-
-    <button id="pauseBtn"
-class="btn-secondary" onclick="pauseAudio()" disabled>⏸ 暫停</button>
-
-    <button id="refreshBtn"
-class="btn-secondary" onclick="location.reload(true)">🔄 重整</button>
-
+    <div class="app-container">
+        <div class="sticky-section">
+            <div class="card display-card">
+                <div id="displayHindi" class="hindi-text">請選擇句子</div>
+                <div id="displayRoman" class="roman-text">Select sentences to start</div>
+                <div id="displayZh" class="zh-text">開始主題聽覺練習</div>
+            </div>
+            
+            <div class="card controls-card">
+                <div class="btn-group">
+    <button id="playBtn" class="btn-primary" onclick="playSelected()">▶ 播放勾選句子</button>
+    <button id="pauseBtn" class="btn-secondary" onclick="pauseAudio()" disabled>⏸ 暫停</button>
+    <button id="refreshBtn" class="btn-secondary" onclick="location.reload(true)">🔄 重整</button>
 </div>
+                <label class="loop-option"><input type="checkbox" id="loopCheck"> 🔁 循環播放勾選清單 (Loop)</label>
+            </div>
 
-               
-<label class="loop-option"><input type="checkbox"
-id="loopCheck"> 🔁 循環播放勾選清單 (Loop)</label>
-
-            </div>
-
-            <div
-class="card">
-
-               
-<div class="filter-grid">
-
-               
-    <div class="filter-group" style="position:
-relative;">
-
-    <span class="filter-label">📚 主題篩選：</span>
-
-    <button type="button"
-id="topicDropdownBtn" class="dropdown-btn" onclick="toggleTopicDropdown(event)">
-
-        <span
-id="topicBtnText">全部主題
-(All)</span>
-
-        <span
-style="font-size: 0.8rem; margin-left: 6px;">▼</span>
-
-    </button>
-
-    <!-- 多選浮動選單區塊 -->
-
-    <div id="topicDropdownMenu"
-class="dropdown-menu">
-
-        <label
-class="dropdown-item dropdown-header-item">
-
-            <input
-type="checkbox" id="selectAllTopicsBox"
-onchange="toggleSelectAllTopics(this.checked)"
-class="checkbox-custom" style="margin:0;">
-
-            <span
-style="font-weight: 700;">全選全部主題</span>
-
-        </label>
-
-        <div
-class="dropdown-divider"></div>
-
-        <div
-id="topicCheckboxList"></div>
-
-    </div>
-
+            <div class="card">
+                <div class="filter-grid">
+                   
+                    <div class="filter-group" style="position: relative;">
+    <span class="filter-label">📚 主題篩選：</span>
+    <button type="button" id="topicDropdownBtn" class="dropdown-btn" onclick="toggleTopicDropdown(event)">
+        <span id="topicBtnText">全部主題 (All)</span>
+        <span style="font-size: 0.8rem; margin-left: 6px;">▼</span>
+    </button>
+    
+    <!-- 多選浮動選單區塊 -->
+    <div id="topicDropdownMenu" class="dropdown-menu">
+        <label class="dropdown-item dropdown-header-item">
+            <input type="checkbox" id="selectAllTopicsBox" onchange="toggleSelectAllTopics(this.checked)" class="checkbox-custom" style="margin:0;">
+            <span style="font-weight: 700;">全選全部主題</span>
+        </label>
+        <div class="dropdown-divider"></div>
+        <div id="topicCheckboxList"></div>
+    </div>
 </div>
+                    <div class="filter-group">
+                        <span class="filter-label">🔍 關鍵字搜尋：</span>
+                        <input type="text" id="searchInput" placeholder="搜尋主題、中文、印地文..." oninput="filterData()">
+                    </div>
+                </div>
+            </div>
+        </div>
 
-               
-    <div class="filter-group">
-
-               
-        <span class="filter-label">🔍 關鍵字搜尋：</span>
-
-               
-        <input type="text"
-id="searchInput" placeholder="搜尋主題、中文、印地文..."
-oninput="filterData()">
-
-               
-    </div>
-
-               
-</div>
-
-            </div>
-
-        </div>
-
-        <div class="card
-list-card">
-
-            <div
-class="list-header">
-
-               
-<label class="select-all-label">
-
-    <input type="checkbox"
-id="selectAllBox" onchange="toggleSelectAll(this.checked)"
-class="checkbox-custom">
-
-    <div
-class="select-all-text-group">
-
-        <span
-class="select-all-title">全選目前顯示句子</span>
-
-        <span
-id="counter" class="select-all-stats">共 0 句 / 已選 0 句</span>
-
-    </div>
-
+        <div class="card list-card">
+            <div class="list-header">
+                <label class="select-all-label">
+    <input type="checkbox" id="selectAllBox" onchange="toggleSelectAll(this.checked)" class="checkbox-custom">
+    <div class="select-all-text-group">
+        <span class="select-all-title">全選目前顯示句子</span>
+        <span id="counter" class="select-all-stats">共 0 句 / 已選 0 句</span>
+    </div>
 </label>
+            </div>
+            <div id="sentenceList" class="sentence-list">
+                <div class="status-msg">⏳ 正在載入語音資料庫...</div>
+            </div>
+        </div>
+    </div>
 
-            </div>
+    <audio id="audioPlayer"></audio>
 
-            <div
-id="sentenceList" class="sentence-list">
+    <script>
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS9BA88Sf3mnAfyLALjFSNAWJEjBCd0A8EiA6JRLuwSMe2JHhT-8vD3nm-7sZKYZ3HOlFLAOfS2Aqd3/pub?gid=0&single=true&output=csv";
 
-               
-<div class="status-msg">⏳ 正在載入語音資料庫...</div>
+        let allSentences = [];
+        let filteredSentences = [];
+        let playQueue = [];
+        let currentIndex = 0;
+        const audio = document.getElementById('audioPlayer');
 
-            </div>
+        function loadSheetsData() {
+            if (!CSV_URL || CSV_URL.includes("YOUR_GOOGLE_SHEETS")) return;
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(r) {
+                    allSentences = r.data.filter(row => row.hindi && row.hindi.trim() !== '' && row.audio);
+                    buildTopicDropdown();
+                    filterData();
+                }
+            });
+        }
 
-        </div>
-
-    </div>
-
-    <audio
-id="audioPlayer"></audio>
-
-    <script>
-
-        const CSV_URL =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vS9BA88Sf3mnAfyLALjFSNAWJEjBCd0A8EiA6JRLuwSMe2JHhT-8vD3nm-7sZKYZ3HOlFLAOfS2Aqd3/pub?gid=0&single=true&output=csv";
-
-        // 🤖 Gemini AI 後端 Web App 網址
-        // 請在 Google Apps Script「部署 > 新增部署 > 網頁應用程式」後，
-        // 將產生的 /exec 網址貼到這裡。
-        const GEMINI_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxOKUODTFzcR5APQBUqmmK8R4BRSQdeltM1nofZ6mnqdp9PWOSypX4IWkvAA7wmcwxcZg/exec";
-
-        let allSentences = [];
-
-        let filteredSentences = [];
-
-        let playQueue = [];
-
-        let currentIndex = 0;
-
-        const audio =
-document.getElementById('audioPlayer');
-
-        function loadSheetsData() {
-
-            if (!CSV_URL ||
-CSV_URL.includes("YOUR_GOOGLE_SHEETS")) return;
-
-           
-Papa.parse(CSV_URL, {
-
-               
-download: true,
-
-               
-header: true,
-
-               
-skipEmptyLines: true,
-
-               
-complete: function(r) {
-
-               
-    allSentences = r.data.filter(row => row.hindi &&
-row.hindi.trim() !== '' && row.audio);
-
-               
-    buildTopicDropdown();
-
-               
-    filterData();
-
-                }
-
-            });
-
-        }
-
-        var selectedTopicIds = []; //
-儲存當前勾選的主題 ID
+        var selectedTopicIds = []; // 儲存當前勾選的主題 ID
 
 // 建立主題選項
-
 function buildTopicDropdown() {
+    var topicListDiv = document.getElementById('topicCheckboxList');
+    if (!topicListDiv) return;
+    topicListDiv.innerHTML = '';
+    var topicMap = new Map();
 
-    var topicListDiv =
-document.getElementById('topicCheckboxList');
+    allSentences.forEach(function(row) {
+        var tId = (row.topic_id || row.Topic_ID || row.topicId || "").toString().trim();
+        var tName = (row.topic_name || row.Topic_Name || row.topicName || "").toString().trim();
+        if (tId && !topicMap.has(tId)) {
+            topicMap.set(tId, tName ? ('#' + tId + ' ' + tName) : ('主題 ' + tId));
+        }
+    });
 
-    if (!topicListDiv) return;
+    // 預設全選所有主題 ID
+    selectedTopicIds = Array.from(topicMap.keys());
 
-    topicListDiv.innerHTML = '';
+    topicMap.forEach(function(displayName, topicId) {
+        var label = document.createElement('label');
+        label.className = 'dropdown-item';
+        label.innerHTML = '<input type="checkbox" class="checkbox-custom topic-box" value="' + topicId + '" checked onchange="onTopicCheckChange()">' +
+                          '<span>' + displayName + '</span>';
+        topicListDiv.appendChild(label);
+    });
 
-    var topicMap = new Map();
-
-    allSentences.forEach(function(row) {
-
-        var tId = (row.topic_id ||
-row.Topic_ID || row.topicId || "").toString().trim();
-
-        var tName = (row.topic_name
-|| row.Topic_Name || row.topicName || "").toString().trim();
-
-        if (tId &&
-!topicMap.has(tId)) {
-
-           
-topicMap.set(tId, tName ? ('#' + tId + ' ' + tName) : ('主題 ' + tId));
-
-        }
-
-    });
-
-    // 預設全選所有主題 ID
-
-    selectedTopicIds =
-Array.from(topicMap.keys());
-
-    topicMap.forEach(function(displayName,
-topicId) {
-
-        var label =
-document.createElement('label');
-
-        label.className =
-'dropdown-item';
-
-        label.innerHTML = '<input
-type="checkbox" class="checkbox-custom topic-box"
-value="' + topicId + '" checked
-onchange="onTopicCheckChange()">' +
-
-               
-          '<span>' + displayName +
-'</span>';
-
-        topicListDiv.appendChild(label);
-
-    });
-
-    var selectAllBox =
-document.getElementById('selectAllTopicsBox');
-
-    if (selectAllBox) selectAllBox.checked =
-true;
-
-    updateTopicBtnText();
-
+    var selectAllBox = document.getElementById('selectAllTopicsBox');
+    if (selectAllBox) selectAllBox.checked = true;
+    updateTopicBtnText();
 }
 
 // 切換選單顯示/隱藏
-
 function toggleTopicDropdown(event) {
-
-    if (event && event.stopPropagation)
-event.stopPropagation();
-
-    var menu =
-document.getElementById('topicDropdownMenu');
-
-    if (menu) menu.classList.toggle('show');
-
+    if (event && event.stopPropagation) event.stopPropagation();
+    var menu = document.getElementById('topicDropdownMenu');
+    if (menu) menu.classList.toggle('show');
 }
 
 // 全選 / 取消全選主題
-
 function toggleSelectAllTopics(isChecked) {
-
-    var boxes = document.querySelectorAll('.topic-box');
-
-    for (var i = 0; i < boxes.length; i++) {
-
-        boxes[i].checked = isChecked;
-
-    }
-
-    onTopicCheckChange();
-
+    var boxes = document.querySelectorAll('.topic-box');
+    for (var i = 0; i < boxes.length; i++) {
+        boxes[i].checked = isChecked;
+    }
+    onTopicCheckChange();
 }
 
 // 當勾選主題變更時
-
 function onTopicCheckChange() {
+    var checkedBoxes = document.querySelectorAll('.topic-box:checked');
+    var totalBoxes = document.querySelectorAll('.topic-box');
+    
+    selectedTopicIds = [];
+    for (var i = 0; i < checkedBoxes.length; i++) {
+        selectedTopicIds.push(checkedBoxes[i].value);
+    }
+    
+    var selectAllBox = document.getElementById('selectAllTopicsBox');
+    if (selectAllBox) {
+        selectAllBox.checked = (totalBoxes.length > 0 && checkedBoxes.length === totalBoxes.length);
+    }
 
-    var checkedBoxes =
-document.querySelectorAll('.topic-box:checked');
-
-    var totalBoxes =
-document.querySelectorAll('.topic-box');
-
-    selectedTopicIds = [];
-
-    for (var i = 0; i < checkedBoxes.length;
-i++) {
-
-       
-selectedTopicIds.push(checkedBoxes[i].value);
-
-    }
-
-    var selectAllBox =
-document.getElementById('selectAllTopicsBox');
-
-    if (selectAllBox) {
-
-        selectAllBox.checked =
-(totalBoxes.length > 0 && checkedBoxes.length ===
-totalBoxes.length);
-
-    }
-
-    updateTopicBtnText();
-
-    filterData();
-
+    updateTopicBtnText();
+    filterData();
 }
 
 // 更新按鈕文字顯示
-
 function updateTopicBtnText() {
+    var totalBoxes = document.querySelectorAll('.topic-box');
+    var checkedCount = selectedTopicIds.length;
+    var btnText = document.getElementById('topicBtnText');
+    if (!btnText) return;
 
-    var totalBoxes =
-document.querySelectorAll('.topic-box');
-
-    var checkedCount = selectedTopicIds.length;
-
-    var btnText =
-document.getElementById('topicBtnText');
-
-    if (!btnText) return;
-
-    if (checkedCount === totalBoxes.length ||
-totalBoxes.length === 0) {
-
-        btnText.innerText = '全部主題 (All)';
-
-    } else if (checkedCount === 0) {
-
-        btnText.innerText = '未選擇主題';
-
-    } else {
-
-        btnText.innerText = '已選擇 ' + checkedCount + ' 個主題';
-
-    }
-
+    if (checkedCount === totalBoxes.length || totalBoxes.length === 0) {
+        btnText.innerText = '全部主題 (All)';
+    } else if (checkedCount === 0) {
+        btnText.innerText = '未選擇主題';
+    } else {
+        btnText.innerText = '已選擇 ' + checkedCount + ' 個主題';
+    }
 }
 
 // 點擊頁面其他地方時自動關閉下拉選單
-
 document.addEventListener('click', function(e) {
-
-    var dropdown =
-document.querySelector('.filter-group');
-
-    var menu =
-document.getElementById('topicDropdownMenu');
-
-    if (dropdown && menu &&
-!dropdown.contains(e.target)) {
-
-       
-menu.classList.remove('show');
-
-    }
-
+    var dropdown = document.querySelector('.filter-group');
+    var menu = document.getElementById('topicDropdownMenu');
+    if (dropdown && menu && !dropdown.contains(e.target)) {
+        menu.classList.remove('show');
+    }
 });
 
-        // 根據多選主題過濾資料
-
+        // 根據多選主題過濾資料
 function filterData() {
+    var queryInput = document.getElementById('searchInput');
+    var query = queryInput ? queryInput.value.trim().toLowerCase() : '';
 
-    var queryInput =
-document.getElementById('searchInput');
+    filteredSentences = allSentences.filter(function(s) {
+        var tId = (s.topic_id || s.Topic_ID || s.topicId || "").toString().trim();
+        var tName = (s.topic_name || s.Topic_Name || s.topicName || "").toString().toLowerCase();
+        var hindi = (s.hindi || "").toString().toLowerCase();
+        var roman = (s.roman || "").toString().toLowerCase();
+        var zh = (s.zh || "").toString().toLowerCase();
 
-    var query = queryInput ?
-queryInput.value.trim().toLowerCase() : '';
+        // 判斷主題是否在已勾選的列表內
+        var matchTopic = selectedTopicIds.indexOf(tId) !== -1;
+        var matchQuery = !query || 
+            tId.indexOf(query) !== -1 || 
+            tName.indexOf(query) !== -1 || 
+            hindi.indexOf(query) !== -1 || 
+            roman.indexOf(query) !== -1 || 
+            zh.indexOf(query) !== -1;
 
-    filteredSentences = allSentences.filter(function(s)
-{
+        return matchTopic && matchQuery;
+    });
 
-        var tId = (s.topic_id ||
-s.Topic_ID || s.topicId || "").toString().trim();
-
-        var tName = (s.topic_name ||
-s.Topic_Name || s.topicName || "").toString().toLowerCase();
-
-        var hindi = (s.hindi ||
-"").toString().toLowerCase();
-
-        var roman = (s.roman ||
-"").toString().toLowerCase();
-
-        var zh = (s.zh ||
-"").toString().toLowerCase();
-
-        // 判斷主題是否在已勾選的列表內
-
-        var matchTopic =
-selectedTopicIds.indexOf(tId) !== -1;
-
-        var matchQuery = !query || 
-
-           
-tId.indexOf(query) !== -1 || 
-
-           
-tName.indexOf(query) !== -1 || 
-
-           
-hindi.indexOf(query) !== -1 || 
-
-           
-roman.indexOf(query) !== -1 || 
-
-           
-zh.indexOf(query) !== -1;
-
-        return matchTopic &&
-matchQuery;
-
-    });
-
-    renderList();
-
+    renderList();
 }
 
-        function renderList() {
-
-            const listDiv =
-document.getElementById('sentenceList');
-
-           
-listDiv.innerHTML = '';
-
-            if
-(filteredSentences.length === 0) {
-
-               
-listDiv.innerHTML = '<div class="status-msg">查無符合條件的句子</div>';
-
-               
-updateSelectCount();
-
-               
-return;
-
-            }
-
-           
-filteredSentences.forEach((s, idx) => {
-
-               
-const item = document.createElement('div');
-
-               
-item.className = 'sentence-item';
-
-               
-item.id = `item-${idx}`;
-
-               
-item.onclick = function(e) {
-
-               
-    if (e.target.tagName !== 'INPUT') {
-
-               
-        const cb = item.querySelector('.checkbox-custom');
-
-               
-        cb.checked = !cb.checked;
-
-               
-        updateSelectCount();
-
-               
-    }
-
-               
-};
-
-               
-const sentenceId = s.id || s.ID || s.Id || (idx + 1);
-
-               
-const topicId = (s.topic_id || s.Topic_ID || s.topicId ||
-"").toString().trim();
-
-               
-const topicName = (s.topic_name || s.Topic_Name || s.topicName ||
-"").toString().trim();
-
-               
-item.innerHTML = `
-
-               
-    <input type="checkbox" class="checkbox-custom
-select-box" value="${idx}"
-onchange="updateSelectCount()">
-
-               
-    <div class="sentence-content">
-
-               
-        <div class="sentence-hindi">
-
-               
-            <span class="id-badge">#${sentenceId}</span>
-
-               
-            ${topicId ? `<span
-class="topic-badge">主題
-${topicId}${topicName ? ' · ' + topicName : ''}</span>` : ''}
-
-               
-            ${s.hindi}
-
-               
-        </div>
-
-               
-        <div
-class="sentence-sub">${s.roman ? s.roman + ' • ' : ''}${s.zh ||
-''}</div>
-
-               
-    </div>
-
-               
-`;
-
-               
-listDiv.appendChild(item);
-
-            });
-
-            document.getElementById('selectAllBox').checked
-= false;
-
-           
-updateSelectCount();
-
-        }
-
-        function
-toggleSelectAll(isChecked) {
-
-           
-document.querySelectorAll('.select-box').forEach(cb => cb.checked =
-isChecked);
-
-            updateSelectCount();
-
-        }
-
-        // ✅ 寫在 SyncToGithub.gs 的 script 標籤內
-
-function updateSelectCount() {
-
-    const checkedBoxes =
-document.querySelectorAll('.select-box:checked');
-
-    const checkedCount = checkedBoxes.length;
-
-    // ID 必須與 HTML 的 id="counter" 對應
-
-    const counterEl =
-document.getElementById('counter');
-
-    if (counterEl) {
-
-       counterEl.innerText = '共 ' + filteredSentences.length + ' 句 / 已選 ' +
-checkedCount + ' 句';
-
-    }
-
-    const selectAllBox =
-document.getElementById('selectAllBox');
-
-    if (selectAllBox) {
-
-        selectAllBox.checked =
-(filteredSentences.length > 0 && checkedCount ===
-filteredSentences.length);
-
-    }
-
-}
-
-        function playSelected() {
-
-            playQueue =
-Array.from(document.querySelectorAll('.select-box:checked')).map(cb =>
-parseInt(cb.value));
-
-            if
-(playQueue.length === 0) return alert('請先勾選句子！');
-
-            currentIndex =
-0;
-
-           
-loadAndPlay(playQueue[currentIndex]);
-
-           
-document.getElementById('playBtn').disabled = true;
-
-           
-document.getElementById('pauseBtn').disabled = false;
-
-        }
-
-        function loadAndPlay(index) {
-
-            const s =
-filteredSentences[index];
-
-            if (!s) return;
-
-            document.getElementById('displayHindi').innerText
-= s.hindi;
-
-           
-document.getElementById('displayRoman').innerText = s.roman || '';
-
-           
-document.getElementById('displayZh').innerText = s.zh || '';
-
-           
-document.querySelectorAll('.sentence-item').forEach(el =>
-el.classList.remove('active'));
-
-            const
-activeItem = document.getElementById(`item-${index}`);
-
-            if (activeItem)
-{
-
-               
-activeItem.classList.add('active');
-
-               //
-保留藍色高亮標示，但頁面不會自動捲動
-
-            }
-
-            audio.src =
-s.audio.trim();
-
-           
-audio.play().catch(e => {
-
-               
-console.error("播放失敗:", e);
-
-               
-alert('音檔載入失敗！請確認檔案路徑並確認檔案已上傳至 GitHub。');
-
-            });
-
-        }
-
-        audio.onended = function() {
-
-            currentIndex++;
-
-            if
-(currentIndex < playQueue.length) {
-
-               
-loadAndPlay(playQueue[currentIndex]);
-
-            } else if
-(document.getElementById('loopCheck').checked) {
-
-                currentIndex
-= 0;
-
-               
-loadAndPlay(playQueue[currentIndex]);
-
-            } else {
-
-               
-document.getElementById('playBtn').disabled = false;
-
-               
-document.getElementById('pauseBtn').disabled = true;
-
-            }
-
-        };
-
-        function pauseAudio() {
-
-            audio.pause();
-
-           
-document.getElementById('playBtn').disabled = false;
-
-           
-document.getElementById('pauseBtn').disabled = true;
-
-        }
-
-        loadSheetsData();
-
-// 💡 4. 點擊「AI 解釋」
-// GitHub Pages 是一般靜態網頁，不能使用 google.script.run。
-// 這裡改用 Google Apps Script Web App 的 JSONP 方式跨網域呼叫。
-function explainCurrentSentence() {
-    const hindiEl = document.getElementById('displayHindi');
-    const zhEl = document.getElementById('displayZh');
-    const modal = document.getElementById('aiModal');
-    const content = document.getElementById('aiContent');
-
-    const hindiText = hindiEl ? hindiEl.innerText.trim() : '';
-    const zhText = zhEl ? zhEl.innerText.trim() : '';
-
-    if (!hindiText || hindiText === '請選擇句子') {
-        return alert('請先選擇要練習的句子！');
-    }
-
-    if (!GEMINI_WEB_APP_URL || GEMINI_WEB_APP_URL.indexOf('PASTE_YOUR_') === 0) {
-        return alert('尚未設定 Gemini Web App 網址。請先在 SyncToGithub.gs 設定 GEMINI_WEB_APP_URL。');
-    }
-
-    if (modal) modal.style.display = 'flex';
-    if (content) {
-        content.innerHTML = '<div class="loading-spinner">⏳ Gemini 老師正在為您詳細拆解語法中，請稍候...</div>';
-    }
-
-    // 每次請求建立唯一 callback，避免同時點擊造成回覆互相覆蓋。
-    const callbackName = '__geminiExplainCallback_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-
-    window[callbackName] = function(result) {
-        try {
-            if (result && result.ok && typeof result.text === 'string') {
-                renderAiResponse(result.text);
-            } else {
-                const message = result && result.error ? result.error : '後端沒有回傳有效的 Gemini 解釋。';
-                renderAiError(message);
+        function renderList() {
+            const listDiv = document.getElementById('sentenceList');
+            listDiv.innerHTML = '';
+
+            if (filteredSentences.length === 0) {
+                listDiv.innerHTML = '<div class="status-msg">查無符合條件的句子</div>';
+                updateSelectCount();
+                return;
             }
-        } catch (err) {
-            renderAiError(err && err.message ? err.message : String(err));
-        } finally {
-            cleanupJsonp(callbackName, script);
+
+            filteredSentences.forEach((s, idx) => {
+                const item = document.createElement('div');
+                item.className = 'sentence-item';
+                item.id = `item-${idx}`;
+                item.onclick = function(e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        const cb = item.querySelector('.checkbox-custom');
+                        cb.checked = !cb.checked;
+                        updateSelectCount();
+                    }
+                };
+                
+                const sentenceId = s.id || s.ID || s.Id || (idx + 1);
+                const topicId = (s.topic_id || s.Topic_ID || s.topicId || "").toString().trim();
+                const topicName = (s.topic_name || s.Topic_Name || s.topicName || "").toString().trim();
+                
+                item.innerHTML = `
+                    <input type="checkbox" class="checkbox-custom select-box" value="${idx}" onchange="updateSelectCount()">
+                    <div class="sentence-content">
+                        <div class="sentence-hindi">
+                            <span class="id-badge">#${sentenceId}</span>
+                            ${topicId ? `<span class="topic-badge">主題 ${topicId}${topicName ? ' • ' + topicName : ''}</span>` : ''}
+                            ${s.hindi}
+                        </div>
+                        <div class="sentence-sub">${s.roman ? s.roman + ' • ' : ''}${s.zh || ''}</div>
+                    </div>
+                `;
+                listDiv.appendChild(item);
+            });
+
+            document.getElementById('selectAllBox').checked = false;
+            updateSelectCount();
         }
-    };
 
-    const params = new URLSearchParams();
-    params.set('callback', callbackName);
-    params.set('hindi', hindiText);
-    params.set('zh', zhText);
-
-    const script = document.createElement('script');
-    script.src = GEMINI_WEB_APP_URL + (GEMINI_WEB_APP_URL.indexOf('?') >= 0 ? '&' : '?') + params.toString();
-    script.async = true;
-    script.onerror = function() {
-        renderAiError('無法連線到 Gemini 後端。請確認 Web App 網址、部署權限與部署版本。');
-        cleanupJsonp(callbackName, script);
-    };
-
-    document.head.appendChild(script);
-
-    // 90 秒逾時，避免網路中斷時畫面永久停在「解析中」。
-    window.setTimeout(function() {
-        if (window[callbackName]) {
-            renderAiError('Gemini 解析逾時，請稍後再試。');
-            cleanupJsonp(callbackName, script);
+        function toggleSelectAll(isChecked) {
+            document.querySelectorAll('.select-box').forEach(cb => cb.checked = isChecked);
+            updateSelectCount();
         }
-    }, 90000);
-}
 
-function cleanupJsonp(callbackName, script) {
-    try {
-        delete window[callbackName];
-    } catch (e) {
-        window[callbackName] = undefined;
-    }
-    if (script && script.parentNode) {
-        script.parentNode.removeChild(script);
-    }
-}
+        function updateSelectCount() {
+            const checkedCount = document.querySelectorAll('.select-box:checked').length;
+            document.getElementById('selectCount').innerText = `共 ${filteredSentences.length} 句 / 已選 ${checkedCount} 句`;
+            
+            const selectAllBox = document.getElementById('selectAllBox');
+            if (filteredSentences.length > 0 && checkedCount === filteredSentences.length) {
+                selectAllBox.checked = true;
+            } else {
+                selectAllBox.checked = false;
+            }
+        }
 
-function renderAiError(message) {
-    const content = document.getElementById('aiContent');
-    if (!content) return;
-    content.innerHTML = '<div style="color:#b91c1c;background:#fef2f2;padding:12px;border-radius:10px;">❌ 解析失敗：' + escapeHtml(message) + '</div>';
-}
+        function playSelected() {
+            playQueue = Array.from(document.querySelectorAll('.select-box:checked')).map(cb => parseInt(cb.value));
+            if (playQueue.length === 0) return alert('請先勾選句子！');
+            currentIndex = 0;
+            loadAndPlay(playQueue[currentIndex]);
+            document.getElementById('playBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+        }
 
-function closeAiModal() {
-    const modal = document.getElementById('aiModal');
-    if (modal) modal.style.display = 'none';
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-}
+        function loadAndPlay(index) {
+            const s = filteredSentences[index];
+            if (!s) return;
+            
+            document.getElementById('displayHindi').innerText = s.hindi;
+            document.getElementById('displayRoman').innerText = s.roman || '';
+            document.getElementById('displayZh').innerText = s.zh || '';
+            
+            document.querySelectorAll('.sentence-item').forEach(el => el.classList.remove('active'));
+            const activeItem = document.getElementById(`item-${index}`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+               // 保留藍色高亮標示，但頁面不會自動捲動
+            }
 
-function escapeHtml(value) {
-    return String(value == null ? '' : value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
+            audio.src = s.audio.trim();
+            audio.play().catch(e => {
+                console.error("播放失敗:", e);
+                alert('音檔載入失敗！請確認檔案路徑並確認檔案已上傳至 GitHub。');
+            });
+        }
 
-// 只允許 Gemini Prompt 指定的兩種自訂元件進入 innerHTML：
-// <Section title="..."> ... </Section>
-// <TextBox text="..." subtext="..."/>
-// 其他 HTML 標籤先跳脫，避免 AI 回傳內容破壞頁面。
-function renderAiResponse(rawText) {
-    let source = String(rawText == null ? '' : rawText);
+        audio.onended = function() {
+            currentIndex++;
+            if (currentIndex < playQueue.length) {
+                loadAndPlay(playQueue[currentIndex]);
+            } else if (document.getElementById('loopCheck').checked) {
+                currentIndex = 0;
+                loadAndPlay(playQueue[currentIndex]);
+            } else {
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+            }
+        };
 
-    // 先保留兩種自訂元件，再將其他 HTML 全部 escape。
-    const placeholders = [];
-    const placeholder = function(html) {
-        const id = '___AI_PLACEHOLDER_' + placeholders.length + '___';
-        placeholders.push(html);
-        return id;
-    };
+        function pauseAudio() {
+            audio.pause();
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+        }
 
-    source = source.replace(/<Sections+title="([sS]*?)">/gi, function(match, title) {
-        return placeholder('<div class="ai-section"><div class="ai-section-title">📌 ' + escapeHtml(title) + '</div>');
-    });
-
-    source = source.replace(/</Section>/gi, function() {
-        return placeholder('</div>');
-    });
-
-    source = source.replace(/<TextBoxs+text="([sS]*?)"s+subtext="([sS]*?)"s*/?>/gi, function(match, text, subtext) {
-        const safeText = escapeHtml(text);
-        const safeSubtext = escapeHtml(subtext);
-        const encodedText = encodeURIComponent(text);
-        return placeholder(
-            '<button type="button" class="ai-textbox" onclick="speakHindi(decodeURIComponent('' + encodedText + ''))">' +
-            '<span>🔊</span>' +
-            '<strong>' + safeText + '</strong>' +
-            '<span style="color:#64748b;font-size:13px;">(' + safeSubtext + ')</span>' +
-            '</button>'
-        );
-    });
-
-    // 避免 Gemini 回傳 Markdown/HTML 直接執行。
-    source = escapeHtml(source);
-
-    // 將常見 Markdown 粗體轉成安全的 <strong>。
-    source = source.replace(/**([^*
-]+)**/g, '<strong>$1</strong>');
-    source = source.replace(/
-/g, '<br>');
-
-    placeholders.forEach(function(html, index) {
-        const token = '___AI_PLACEHOLDER_' + index + '___';
-        source = source.replace(token, html);
-    });
-
-    const content = document.getElementById('aiContent');
-    if (content) content.innerHTML = source;
-}
-
-function speakHindi(text) {
-    if (!('speechSynthesis' in window)) {
-        return alert('此裝置的瀏覽器不支援語音朗讀。');
-    }
-
-    window.speechSynthesis.cancel();
-    const msg = new SpeechSynthesisUtterance(String(text || ''));
-    msg.lang = 'hi-IN';
-    msg.rate = 0.8;
-    window.speechSynthesis.speak(msg);
-}
-
-// 點擊 Modal 背景也可以關閉。
-document.addEventListener('click', function(event) {
-    const modal = document.getElementById('aiModal');
-    if (modal && event.target === modal) {
-        closeAiModal();
-    }
-});
-
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeAiModal();
-    }
-});
-
-</script>
-
-<!-- 💡 2. AI 解釋彈出視窗 -->
-
-    <div id="aiModal"
-class="modal-overlay" style="display: none;">
-
-        <div
-class="modal-content">
-
-            <div
-class="modal-header">
-
-               
-<h3>🤖 AI 印地語語法剝洋蔥解析</h3>
-
-               
-<span class="close-btn"
-onclick="closeAiModal()">&times;</span>
-
-            </div>
-
-            <div
-id="aiContent" class="modal-body">
-
-               
-<div class="loading-spinner">⏳ Gemini 老師正在為您詳細拆解語法中...</div>
-
-            </div>
-
-        </div>
-
-    </div>
-
+        loadSheetsData();
+    </script>
 </body>
-
 </html>
