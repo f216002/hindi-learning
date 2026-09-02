@@ -299,31 +299,45 @@ header h1 {
 
     <div id="displayZh" class="zh-text">開始主題聽覺練習</div>
 
-    <button
-        id="explainBtn"
-        type="button"
-        disabled
-onclick="alert(currentHindi + '
-
-' + currentRoman + '
-
-' + currentZh)"
-        
-        style="
-            margin-top: 4px;
-            padding: 10px 18px;
-            border: 1px solid rgba(255,255,255,0.45);
-            border-radius: 12px;
-            background: rgba(255,255,255,0.18);
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 700;
-            cursor: pointer;
-        "
-    >
-        ✨ 解釋
-    </button>
-
+   <button
+    id="explainBtn"
+    type="button"
+    onclick="explainCurrentSentence()"
+    style="
+        margin-top: 4px;
+        padding: 10px 20px;
+        border: 1px solid rgba(255,255,255,0.55);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.22);
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+        touch-action: manipulation;
+    "
+    onmousedown="
+        this.style.transform='translateY(2px)';
+        this.style.opacity='0.65';
+        this.style.boxShadow='0 1px 3px rgba(0,0,0,0.18)';
+    "
+    onmouseup="
+        this.style.transform='translateY(0)';
+        this.style.opacity='1';
+        this.style.boxShadow='0 3px 8px rgba(0,0,0,0.18)';
+    "
+    ontouchstart="
+        this.style.transform='translateY(2px)';
+        this.style.opacity='0.65';
+    "
+    ontouchend="
+        this.style.transform='translateY(0)';
+        this.style.opacity='1';
+    "
+>
+    ✨ 解釋
+</button>
 </div>
             
             <div class="card controls-card">
@@ -712,12 +726,7 @@ function updateSelectCount() {
     currentRoman = s.roman || '';
     currentZh = s.zh || '';
 
-                const explainBtn = document.getElementById('explainBtn');
-
-    if (explainBtn) {
-        explainBtn.disabled = false;
-    }
-
+               
             document.querySelectorAll('.sentence-item').forEach(el => el.classList.remove('active'));
             const activeItem = document.getElementById(`item-${index}`);
             if (activeItem) {
@@ -760,14 +769,12 @@ function explainCurrentSentence() {
 
     var explainBtn = document.getElementById('explainBtn');
 
-    // 先立即改按鈕，讓使用者知道已經按成功
     if (explainBtn) {
-        explainBtn.disabled = true;
         explainBtn.innerText = '⏳ Gemini 解釋中...';
+        explainBtn.style.opacity = '0.65';
     }
 
-
-    // --------------------------------------------------
+    // 後面繼續你的 Gemini JSONP 呼叫...    // --------------------------------------------------
     // 如果解釋面板不存在，就由 JavaScript 自動建立
     // --------------------------------------------------
     var panel = document.getElementById('geminiPanel');
