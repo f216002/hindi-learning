@@ -767,6 +767,9 @@ function explainCurrentSentence() {
         return;
     }
 
+    var WEB_APP_URL =
+        'https://script.google.com/macros/s/AKfycbwJSRywJnRF-H7B8imfFNzGAL-Af32AEOuMZUMgAUKc7zg1Yox4NedVWz1IeljRKc7jiQ/exec';
+
     var explainBtn = document.getElementById('explainBtn');
 
     if (explainBtn) {
@@ -774,9 +777,6 @@ function explainCurrentSentence() {
         explainBtn.style.opacity = '0.65';
     }
 
-    // 後面繼續你的 Gemini JSONP 呼叫...    // --------------------------------------------------
-    // 如果解釋面板不存在，就由 JavaScript 自動建立
-    // --------------------------------------------------
     var panel = document.getElementById('geminiPanel');
 
     if (!panel) {
@@ -820,7 +820,7 @@ function explainCurrentSentence() {
             '<div id="geminiStatus" ' +
             'style="padding:18px;background:#eff6ff;border-radius:12px;' +
             'color:#1e40af;font-weight:700;margin-bottom:16px;">' +
-            '⏳ Gemini 正在分析這句印地文，請稍候……</div>' +
+            '⏳ 正在連線 Gemini AI，請稍候……</div>' +
 
             '<div id="geminiResult" ' +
             'style="white-space:pre-wrap;font-size:1rem;line-height:1.8;' +
@@ -831,64 +831,56 @@ function explainCurrentSentence() {
         document.body.appendChild(panel);
     }
 
-
-    // --------------------------------------------------
-    // 顯示目前播放的句子
-    // --------------------------------------------------
-    document.getElementById('geminiOriginalHindi').innerText =
-        currentHindi || '';
-
-    document.getElementById('geminiOriginalRoman').innerText =
-        currentRoman || '';
-
-    document.getElementById('geminiOriginalZh').innerText =
-        currentZh || '';
-
+    var hindiBox = document.getElementById('geminiOriginalHindi');
+    var romanBox = document.getElementById('geminiOriginalRoman');
+    var zhBox = document.getElementById('geminiOriginalZh');
     var statusBox = document.getElementById('geminiStatus');
     var resultBox = document.getElementById('geminiResult');
+
+    hindiBox.innerText = currentHindi || '';
+    romanBox.innerText = currentRoman || '';
+    zhBox.innerText = currentZh || '';
 
     panel.style.display = 'block';
 
     statusBox.style.display = 'block';
-    statusBox.innerText = '⏳ Gemini 正在分析這句印地文，請稍候……';
+    statusBox.innerText = '⏳ 正在連線 Gemini AI，請稍候……';
 
     resultBox.innerText = '';
 
-
-    // --------------------------------------------------
-    // 建立 JSONP callback
-    // --------------------------------------------------
     var callbackName =
         'geminiCallback_' +
-        Date.now() +
+        String(Date.now()) +
         '_' +
-        Math.floor(Math.random() * 100000);
+        String(Math.floor(Math.random() * 100000));
 
     var jsonpScript = document.createElement('script');
 
     var completed = false;
 
+    var timeoutId = null;
 
     function restoreButton() {
-
         if (explainBtn) {
-            explainBtn.disabled = false;
             explainBtn.innerText = '✨ 解釋';
+            explainBtn.style.opacity = '1';
         }
     }
 
-
-    function removeJsonpScript() {
-
+    function removeScript() {
         if (jsonpScript && jsonpScript.parentNode) {
             jsonpScript.parentNode.removeChild(jsonpScript);
         }
     }
 
+    function removeCallback() {
+        try {
+            delete window[callbackName];
+        } catch (e) {
+            window[callbackName] = undefined;
+        }
+    }
 
-    // --------------------------------------------------
-    // Gemini 成功回傳
-    // --------------------------------------------------
     window[callbackName] = function(result) {
 
         if (completed) {
@@ -897,7 +889,11 @@ function explainCurrentSentence() {
 
         completed = true;
 
-        removeJsonpScript();
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+
+        removeScript();
 
         if (!result) {
 
@@ -905,43 +901,32 @@ function explainCurrentSentence() {
             statusBox.innerText = '❌ Gemini 沒有回傳資料。';
 
             restoreButton();
+            removeCallback();
             return;
         }
-
 
         if (!result.ok) {
 
             statusBox.style.display = 'block';
 
             statusBox.innerText =
-                '❌ Gemini 解釋失敗：' +
+                '❌ Gemini API 回傳錯誤：' +
                 (result.error || '未知錯誤');
 
             restoreButton();
+            removeCallback();
             return;
         }
 
-
-        // 成功
         statusBox.style.display = 'none';
 
         resultBox.innerText =
-            result.text || 'Gemini 沒有回傳解釋文字。';
+            result.text || 'Gemini 沒有回傳解釋內容。';
 
         restoreButton();
-
-
-        try {
-            delete window[callbackName];
-        } catch (e) {
-            window[callbackName] = undefined;
-        }
+        removeCallback();
     };
 
-
-    // --------------------------------------------------
-    // 網路 / JSONP 載入失敗
-    // --------------------------------------------------
     jsonpScript.onerror = function() {
 
         if (completed) {
@@ -950,39 +935,53 @@ function explainCurrentSentence() {
 
         completed = true;
 
-        removeJsonpScript();
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+
+        removeScript();
+        removeCallback();
 
         statusBox.style.display = 'block';
-
         statusBox.innerText =
-            '❌ 無法連線至 Gemini 後端。';
+            '❌ 無法載入 Apps Script Gemini API。';
 
         restoreButton();
-
-
-        try {
-            delete window[callbackName];
-        } catch (e) {
-            window[callbackName] = undefined;
-        }
     };
 
-
-    // --------------------------------------------------
-    // 呼叫 Apps Script Web App
-    // --------------------------------------------------
     var requestUrl =
-        GEMINI_WEB_APP_URL +
+        WEB_APP_URL +
         '?callback=' + encodeURIComponent(callbackName) +
         '&hindi=' + encodeURIComponent(currentHindi) +
         '&zh=' + encodeURIComponent(currentZh || '');
 
+    statusBox.innerText =
+        '⏳ 已送出句子，正在等待 Gemini AI 解釋……';
 
     jsonpScript.src = requestUrl;
+    jsonpScript.async = true;
 
     document.body.appendChild(jsonpScript);
-}
 
+    timeoutId = setTimeout(function() {
+
+        if (completed) {
+            return;
+        }
+
+        completed = true;
+
+        removeScript();
+        removeCallback();
+
+        statusBox.style.display = 'block';
+        statusBox.innerText =
+            '❌ Gemini 等待超過 90 秒，後端沒有完成回傳。';
+
+        restoreButton();
+
+    }, 90000);
+}
 
 function closeGeminiPanel() {
 
