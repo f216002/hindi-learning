@@ -600,7 +600,13 @@ function updateSelectCount() {
             document.getElementById('displayHindi').innerText = s.hindi;
             document.getElementById('displayRoman').innerText = s.roman || '';
             document.getElementById('displayZh').innerText = s.zh || '';
-            
+                const explainBtn = document.getElementById('explainBtn');
+
+    if (explainBtn) {
+        explainBtn.disabled = false;
+    }
+
+
             document.querySelectorAll('.sentence-item').forEach(el => el.classList.remove('active'));
             const activeItem = document.getElementById(`item-${index}`);
             if (activeItem) {
