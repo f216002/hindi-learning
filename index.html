@@ -303,7 +303,12 @@ header h1 {
         id="explainBtn"
         type="button"
         disabled
-onclick="explainCurrentSentence()"        
+onclick="alert(currentHindi + '
+
+' + currentRoman + '
+
+' + currentZh)"
+        
         style="
             margin-top: 4px;
             padding: 10px 18px;
@@ -378,9 +383,6 @@ onclick="explainCurrentSentence()"
 
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS9BA88Sf3mnAfyLALjFSNAWJEjBCd0A8EiA6JRLuwSMe2JHhT-8vD3nm-7sZKYZ3HOlFLAOfS2Aqd3/pub?gid=0&single=true&output=csv";
-
-const GEMINI_WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbwJSRywJnRF-H7B8imfFNzGAL-Af32AEOuMZUMgAUKc7zg1Yox4NedVWz1IeljRKc7jiQ/exec";
 
         let allSentences = [];
         let filteredSentences = [];
@@ -651,103 +653,6 @@ function updateSelectCount() {
             document.getElementById('playBtn').disabled = false;
             document.getElementById('pauseBtn').disabled = true;
         }
-// ============================================================
-// ✨ Gemini 解釋目前播放句子
-// ============================================================
-
-function explainCurrentSentence() {
-
-    if (!currentHindi) {
-        alert('目前沒有可解釋的句子。請先播放一句。');
-        return;
-    }
-
-    const explainBtn = document.getElementById('explainBtn');
-
-    if (explainBtn) {
-        explainBtn.disabled = true;
-        explainBtn.innerText = '⏳ Gemini 解釋中...';
-    }
-
-    const callbackName =
-        'geminiCallback_' +
-        Date.now() +
-        '_' +
-        Math.floor(Math.random() * 100000);
-
-    const script = document.createElement('script');
-
-    const cleanup = function() {
-
-        if (script.parentNode) {
-            script.parentNode.removeChild(script);
-        }
-
-        try {
-            delete window[callbackName];
-        } catch (e) {
-            window[callbackName] = undefined;
-        }
-
-        if (explainBtn) {
-            explainBtn.disabled = false;
-            explainBtn.innerText = '✨ 解釋';
-        }
-    };
-
-
-    // Apps Script 回傳資料後會執行這個 callback
-    window[callbackName] = function(result) {
-
-        cleanup();
-
-        if (!result) {
-            alert('Gemini 沒有回傳資料。');
-            return;
-        }
-
-        if (!result.ok) {
-            alert(
-                'Gemini 解釋失敗：
-
-' +
-                (result.error || '未知錯誤')
-            );
-            return;
-        }
-
-        // 目前先用 alert 驗證 Gemini 的內容真的有回到 GitHub
-        alert(result.text);
-    };
-
-
-    script.onerror = function() {
-
-        cleanup();
-
-        alert(
-            '無法連線至 Gemini 後端。
-
-' +
-            '請確認 Apps Script Web App 部署仍然有效。'
-        );
-    };
-
-
-    const params =
-        '?callback=' + encodeURIComponent(callbackName) +
-        '&hindi=' + encodeURIComponent(currentHindi) +
-        '&zh=' + encodeURIComponent(currentZh || '');
-
-
-    script.src =
-        GEMINI_WEB_APP_URL +
-        params;
-
-
-    document.body.appendChild(script);
-}
-
 
         loadSheetsData();
     </script>
