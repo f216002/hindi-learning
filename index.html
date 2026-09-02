@@ -544,17 +544,22 @@ function filterData() {
             updateSelectCount();
         }
 
-        function updateSelectCount() {
-            const checkedCount = document.querySelectorAll('.select-box:checked').length;
-            document.getElementById('selectCount').innerText = `共 ${filteredSentences.length} 句 / 已選 ${checkedCount} 句`;
-            
-            const selectAllBox = document.getElementById('selectAllBox');
-            if (filteredSentences.length > 0 && checkedCount === filteredSentences.length) {
-                selectAllBox.checked = true;
-            } else {
-                selectAllBox.checked = false;
-            }
-        }
+        // ✅ 寫在 SyncToGithub.gs 的 script 標籤內
+function updateSelectCount() {
+    const checkedBoxes = document.querySelectorAll('.select-box:checked');
+    const checkedCount = checkedBoxes.length;
+
+    // ID 必須與 HTML 的 id="counter" 對應
+    const counterEl = document.getElementById('counter');
+    if (counterEl) {
+       counterEl.innerText = '共 ' + filteredSentences.length + ' 句 / 已選 ' + checkedCount + ' 句';
+    }
+    
+    const selectAllBox = document.getElementById('selectAllBox');
+    if (selectAllBox) {
+        selectAllBox.checked = (filteredSentences.length > 0 && checkedCount === filteredSentences.length);
+    }
+}
 
         function playSelected() {
             playQueue = Array.from(document.querySelectorAll('.select-box:checked')).map(cb => parseInt(cb.value));
