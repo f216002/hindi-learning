@@ -654,6 +654,103 @@ function updateSelectCount() {
             document.getElementById('pauseBtn').disabled = true;
         }
 
+        function explainCurrentSentence() {
+
+    if (!currentHindi) {
+        alert('目前沒有可解釋的句子。請先播放一句。');
+        return;
+    }
+
+    const explainBtn = document.getElementById('explainBtn');
+
+    if (explainBtn) {
+        explainBtn.disabled = true;
+        explainBtn.innerText = '⏳ Gemini 解釋中...';
+    }
+
+    const callbackName =
+        'geminiCallback_' +
+        Date.now() +
+        '_' +
+        Math.floor(Math.random() * 100000);
+
+    const script = document.createElement('script');
+
+    function cleanup() {
+
+        if (script.parentNode) {
+            script.parentNode.removeChild(script);
+        }
+
+        try {
+            delete window[callbackName];
+        } catch (e) {
+            window[callbackName] = undefined;
+        }
+
+        if (explainBtn) {
+            explainBtn.disabled = false;
+            explainBtn.innerText = '✨ 解釋';
+        }
+    }
+
+    window[callbackName] = function(result) {
+
+        if (!result) {
+            cleanup();
+            alert('Gemini 沒有回傳資料。');
+            return;
+        }
+
+        if (!result.ok) {
+            const errorMessage =
+                result.error
+                    ? result.error
+                    : '未知錯誤';
+
+            cleanup();
+
+            alert(
+                'Gemini 解釋失敗：' +
+                String.fromCharCode(10) +
+                String.fromCharCode(10) +
+                errorMessage
+            );
+
+            return;
+        }
+
+        const explanation = result.text || '';
+
+        cleanup();
+
+        alert(explanation);
+    };
+
+    script.onerror = function() {
+
+        cleanup();
+
+        alert(
+            '無法連線至 Gemini 後端。' +
+            String.fromCharCode(10) +
+            String.fromCharCode(10) +
+            '請確認 Apps Script Web App 部署仍然有效。'
+        );
+    };
+
+    const params =
+        '?callback=' + encodeURIComponent(callbackName) +
+        '&hindi=' + encodeURIComponent(currentHindi) +
+        '&zh=' + encodeURIComponent(currentZh || '');
+
+    script.src =
+        GEMINI_WEB_APP_URL +
+        params;
+
+    document.body.appendChild(script);
+}
+
         loadSheetsData();
     </script>
 </body>
