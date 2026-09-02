@@ -16,6 +16,64 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
 
+
+/* AI 按鈕樣式 */
+.ai-explain-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+}
+.ai-explain-btn:hover {
+    background: rgba(255, 255, 255, 0.45);
+    transform: scale(1.05);
+}
+
+/* Modal 彈出視窗 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    display: flex; justify-content: center; align-items: center;
+}
+.modal-content {
+    background: white;
+    width: 90%; max-width: 700px; max-height: 85vh;
+    border-radius: 16px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+.modal-header {
+    padding: 16px 20px; background: #1e40af; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.modal-body { padding: 20px; overflow-y: auto; font-size: 15px; line-height: 1.7; color: #334155; }
+.close-btn { font-size: 24px; cursor: pointer; color: white; }
+
+/* 發音元件樣式 */
+.ai-section { background: #f8fafc; border-left: 4px solid #2563eb; padding: 12px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+.ai-section-title { font-weight: bold; color: #1e3a8a; margin-bottom: 8px; }
+.ai-textbox {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #eff6ff; border: 1px solid #bfdbfe; padding: 6px 12px;
+    border-radius: 8px; margin: 4px 0; cursor: pointer;
+}
+.ai-textbox:hover { background: #dbeafe; }
+
+
+
+
     /* 💡 全選區域上下兩行佈局最適化 */
 .select-all-label {
     display: flex;
@@ -291,12 +349,20 @@ header h1 {
 
     <div class="app-container">
         <div class="sticky-section">
-            <div class="card display-card">
+
+          
+           <div class="card display-card" style="position: relative;">
+                <!-- 💡 1. 在這裡加入 AI 解釋按鈕 -->
+                <button class="ai-explain-btn" onclick="explainCurrentSentence()">💡 AI 解釋</button>
+
                 <div id="displayHindi" class="hindi-text">請選擇句子</div>
                 <div id="displayRoman" class="roman-text">Select sentences to start</div>
                 <div id="displayZh" class="zh-text">開始主題聽覺練習</div>
             </div>
-            
+
+
+
+
             <div class="card controls-card">
                 <div class="btn-group">
     <button id="playBtn" class="btn-primary" onclick="playSelected()">▶ 播放勾選句子</button>
@@ -612,6 +678,74 @@ function updateSelectCount() {
         }
 
         loadSheetsData();
+
+// 💡 4. 點擊「AI 解釋」執行這段
+function explainCurrentSentence() {
+    // 讀取當前顯示的印地文與中文 (對應 displayHindi 與 displayZh)
+    const hindiText = document.getElementById('displayHindi').innerText;
+    const zhText = document.getElementById('displayZh').innerText;
+
+    if (!hindiText || hindiText === '請選擇句子') {
+        return alert('請先選擇要練習的句子！');
+    }
+
+    document.getElementById('aiModal').style.display = 'flex';
+    document.getElementById('aiContent').innerHTML = '<div class="loading-spinner">⏳ Gemini 老師正在為您詳細拆解語法中，請稍候...</div>';
+
+    // 遠端呼叫 GeminiService.gs 的 API 函式
+    google.script.run
+        .withSuccessHandler(renderAiResponse)
+        .withFailureHandler(function(err) {
+            document.getElementById('aiContent').innerHTML = '<div style="color:red;">❌ 解析失敗: ' + err.message + '</div>';
+        })
+        .callGeminiExplain(hindiText, zhText);
+}
+
+function closeAiModal() {
+    document.getElementById('aiModal').style.display = 'none';
+}
+
+function renderAiResponse(rawText) {
+    let parsedHtml = rawText;
+    parsedHtml = parsedHtml.replace(/<Section title="(.*?)">/g, '<div class="ai-section"><div class="ai-section-title">📌 $1</div>');
+    parsedHtml = parsedHtml.replace(/</Section>/g, '</div>');
+    parsedHtml = parsedHtml.replace(/<TextBox text="(.*?)" subtext="(.*?)"s*/?>/g, function(match, text, subtext) {
+        return '<div class="ai-textbox" onclick="speakHindi('' + text.replace(/'/g, "\'") + '')">' +
+                    '<span>🔊</span>' +
+                    '<strong>' + text + '</strong>' +
+                    '<span style="color:#64748b; font-size:13px;">(' + subtext + ')</span>' +
+                '</div>';
+    });
+    parsedHtml = parsedHtml.replace(/
+/g, '<br>');
+    document.getElementById('aiContent').innerHTML = parsedHtml;
+}
+
+function speakHindi(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'hi-IN';
+        msg.rate = 0.8;
+        window.speechSynthesis.speak(msg);
+    }
+}
+
     </script>
+
+<!-- 💡 2. AI 解釋彈出視窗 -->
+    <div id="aiModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🤖 AI 印地語語法剝洋蔥解析</h3>
+                <span class="close-btn" onclick="closeAiModal()">&times;</span>
+            </div>
+            <div id="aiContent" class="modal-body">
+                <div class="loading-spinner">⏳ Gemini 老師正在為您詳細拆解語法中...</div>
+            </div>
+        </div>
+    </div>
+</body>
+
 </body>
 </html>
