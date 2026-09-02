@@ -303,7 +303,12 @@ header h1 {
         id="explainBtn"
         type="button"
         disabled
-        onclick="alert('✅ 解釋按鈕已經啟用！')"
+onclick="alert(currentHindi + '
+
+' + currentRoman + '
+
+' + currentZh)"
+        
         style="
             margin-top: 4px;
             padding: 10px 18px;
@@ -383,6 +388,10 @@ header h1 {
         let filteredSentences = [];
         let playQueue = [];
         let currentIndex = 0;
+let currentHindi = '';
+let currentRoman = '';
+let currentZh = '';
+
         const audio = document.getElementById('audioPlayer');
 
         function loadSheetsData() {
@@ -601,12 +610,16 @@ function updateSelectCount() {
             document.getElementById('displayHindi').innerText = s.hindi;
             document.getElementById('displayRoman').innerText = s.roman || '';
             document.getElementById('displayZh').innerText = s.zh || '';
+
+    currentHindi = s.hindi || '';
+    currentRoman = s.roman || '';
+    currentZh = s.zh || '';
+
                 const explainBtn = document.getElementById('explainBtn');
 
     if (explainBtn) {
         explainBtn.disabled = false;
     }
-
 
             document.querySelectorAll('.sentence-item').forEach(el => el.classList.remove('active'));
             const activeItem = document.getElementById(`item-${index}`);
