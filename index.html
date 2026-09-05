@@ -227,7 +227,7 @@ header h1 {
             body { padding: 24px; }
             header { text-align: left; }
             .app-container { display: grid; grid-template-columns: 380px 1fr; align-items: start; }
-            .sticky-section { position: sticky; top: 24px; }
+           .sticky-section { display: flex; flex-direction: column; gap: 14px; }
         }
         @media (max-width: 500px) {
             .filter-grid { grid-template-columns: 1fr; }
@@ -248,22 +248,13 @@ header h1 {
     align-items: center;
     cursor: pointer;
 }
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    max-height: 250px;
-    overflow-y: auto;
-    background: #ffffff;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    z-index: 999;
-    margin-top: 4px;
-    padding: 6px 0;
-}
+.dropdown-menu { 
+            display: none; position: absolute; top: 100%; left: 0; width: 100%; 
+            max-height: 350px; overflow-y: auto; background: #ffffff; 
+            border: 1px solid var(--border-color); border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 9999; margin-top: 4px; padding: 6px 0; 
+        }
+
 .dropdown-menu.show { display: block; }
 .dropdown-item {
     display: flex;
@@ -395,7 +386,6 @@ header h1 {
 
     <audio id="audioPlayer"></audio>
 
-
 <div id="geminiPanel"
      style="
         display:none;
@@ -491,7 +481,6 @@ header h1 {
     </div>
 </div>
 
-
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS9BA88Sf3mnAfyLALjFSNAWJEjBCd0A8EiA6JRLuwSMe2JHhT-8vD3nm-7sZKYZ3HOlFLAOfS2Aqd3/pub?gid=0&single=true&output=csv";
 
@@ -521,36 +510,37 @@ let currentZh = '';
 
         var selectedTopicIds = []; // 儲存當前勾選的主題 ID
 
-// 建立主題選項
-function buildTopicDropdown() {
-    var topicListDiv = document.getElementById('topicCheckboxList');
-    if (!topicListDiv) return;
-    topicListDiv.innerHTML = '';
-    var topicMap = new Map();
+// 建立主題選項 (預設取消全選)
+        function buildTopicDropdown() {
+            const topicListDiv = document.getElementById('topicCheckboxList');
+            if (!topicListDiv) return;
+            topicListDiv.innerHTML = '';
+            const topicMap = new Map();
 
-    allSentences.forEach(function(row) {
-        var tId = (row.topic_id || row.Topic_ID || row.topicId || "").toString().trim();
-        var tName = (row.topic_name || row.Topic_Name || row.topicName || "").toString().trim();
-        if (tId && !topicMap.has(tId)) {
-            topicMap.set(tId, tName ? ('#' + tId + ' ' + tName) : ('主題 ' + tId));
+            allSentences.forEach(row => {
+                const tId = (row.topic_id || row.Topic_ID || "").toString().trim();
+                const tName = (row.topic_name || row.Topic_Name || "").toString().trim();
+                if (tId && !topicMap.has(tId)) {
+                    topicMap.set(tId, tName ? ('#' + tId + ' ' + tName) : ('主題 ' + tId));
+                }
+            });
+
+            // 預設清空已選擇主題
+            selectedTopicIds = [];
+
+            topicMap.forEach((name, id) => {
+                const label = document.createElement('label');
+                label.className = 'dropdown-item';
+                // 取消 checked 屬性
+                label.innerHTML = '<input type="checkbox" class="checkbox-custom topic-box" value="' + id + '" onchange="onTopicCheckChange()"><span>' + name + '</span>';
+                topicListDiv.appendChild(label);
+            });
+
+            const allBox = document.getElementById('selectAllTopicsBox');
+            if (allBox) allBox.checked = false; // 頂層全選方塊預設不勾選
+            updateTopicBtnText();
         }
-    });
 
-    // 預設全選所有主題 ID
-    selectedTopicIds = Array.from(topicMap.keys());
-
-    topicMap.forEach(function(displayName, topicId) {
-        var label = document.createElement('label');
-        label.className = 'dropdown-item';
-        label.innerHTML = '<input type="checkbox" class="checkbox-custom topic-box" value="' + topicId + '" checked onchange="onTopicCheckChange()">' +
-                          '<span>' + displayName + '</span>';
-        topicListDiv.appendChild(label);
-    });
-
-    var selectAllBox = document.getElementById('selectAllTopicsBox');
-    if (selectAllBox) selectAllBox.checked = true;
-    updateTopicBtnText();
-}
 
 // 切換選單顯示/隱藏
 function toggleTopicDropdown(event) {
